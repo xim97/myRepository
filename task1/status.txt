@@ -1,0 +1,22 @@
+On branch master
+
+Initial commit
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        .idea/
+        src/
+        "\320\243\320\237.iml"
+
+nothing added to commit but untracked files present (use "git add" to track)
+__________________________________________________________________________________________
+On branch master
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        src/
+        task1/
+
+nothing added to commit but untracked files present (use "git add" to track)
+__________________________________________________________________________________________
