@@ -1,0 +1,11 @@
+commit a819fbab43dd2b51c4e9c040c13144e5d1d7fad8
+Author: Maxim Yefimovich <xim97@mail.ru>
+Date:   Tue Feb 7 21:29:34 2017 +0300
+
+    add status.txt
+
+commit 68f78f5de1ffb0008423e913e343ddc1aea1969b
+Author: Maxim Yefimovich <xim97@mail.ru>
+Date:   Tue Feb 7 21:28:45 2017 +0300
+
+    add .gitignore
