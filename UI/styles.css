@@ -40,24 +40,29 @@ h2 {
 h3 {
     font: 16px/18px Times, serif;
 }
+
 input {
-	color: #d4d2cf;
+    color: #d4d2cf;
 }
-article{
-	margin-left:  -1%;
+
+article {
+    margin-left: -1%;
 }
+
 /* Header */
 header {
     width: 100%;
     color: #000000;
-    background-color: #9916bc;     
+    background-color: #9916bc;
 }
+
 p {
-	margin: 5px;
+    margin: 5px;
 }
+
 /* Type of page */
-.title {    
-    font: 30px/30px fantasy;        
+.title {
+    font: 30px/30px fantasy;
 }
 
 /* Actions */
@@ -68,16 +73,16 @@ p {
     text-align: right;
 }
 
-.add-article-buttom {
-	margin-top: 0.5%;	
+.add-article-button {
+    margin-top: 0.5%;
     margin-right: 4%;
-	float: right;    
-   	padding-right: 5px;
-   	padding-left: 5px;
+    float: right;
+    padding-right: 5px;
+    padding-left: 5px;
     border-radius: 8px;
     font: 20px/25px Times, serif;
     text-align: center;
-    background-color:#0807b1;
+    background-color: #0807b1;
     color: #ffffff;
 }
 
@@ -88,18 +93,18 @@ p {
     padding-right: 5px;
     padding-left: 5px;
     border-radius: 10px;
-    background-color:#0807b1;
+    background-color: #0807b1;
     color: #ffffff;
 }
 
-.login-logout-buttom {
-	margin-right: 3%;
+.login-logout-button {
+    margin-right: 3%;
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 10px;
     font: 20px/30px Times, serif;
     text-align: center;
-    background-color:#0807b1;
+    background-color: #0807b1;
     color: #ffffff;
 }
 
@@ -111,7 +116,7 @@ p {
 }
 
 .article-list p {
- 	margin-left: -1px;
+    margin-left: -1px;
     padding: 2px;
     background-color: #e0dbd2;
     border-radius: 5px;
@@ -150,62 +155,67 @@ p {
 }
 
 .view-button {
-	margin-right: 1%;
+    margin-right: 1%;
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 10px;
     font: 18px/260% Times, serif;
     text-align: center;
-    background-color:#0807b1;
+    background-color: #0807b1;
     color: #ffffff;
 }
 
 .edit-button {
-	margin-right: 1%;
+    margin-right: 1%;
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 10px;
     font: 18px/260% Times, serif;
     text-align: center;
-    background-color:#0807b1;
+    background-color: #0807b1;
     color: #ffffff;
 }
 
 .delete-button {
-	margin-right: 1%;
+    margin-right: 1%;
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 10px;
     font: 18px/260% Times, serif;
     text-align: center;
-    background-color:#0807b1;
+    background-color: #0807b1;
     color: #ffffff;
 }
+
 /*Filters*/
-.filters{
+.filters {
     float: right;
     width: 20%;
     height: 360px;
-    margin-top: 1%; 
-    margin-right: 10px;   
+    margin-top: 1%;
+    margin-right: 10px;
     color: #000000;
     border-radius: 10px;
     background-color: #9916bc;
     text-align: center;
     box-shadow: 0 0 5px #000000
 }
+
 .filters h1 {
     color: #000000;
 }
+
 .author-filter input,
 .tags-filter input {
     margin: 8px;
     width: 48%;
     color: #000000;
 }
-.date-filter input{
-	width: 75%;
+
+.date-filter input {
+    width: 75%;
 }
+
 .confirm-filter {
     margin-left: 20%;
     margin-right: 20%;
@@ -215,22 +225,26 @@ p {
     border-radius: 10px;
     font: 18px/23px Times, serif;
     text-align: center;
-    background-color:#0807b1;
+    background-color: #0807b1;
     color: #ffffff;
 }
-.date-filter-input{
-	 clear: both; 
-	 text-align: right;
-	 line-height: 40px;
+
+.date-filter-input {
+    clear: both;
+    text-align: right;
+    line-height: 40px;
 }
-label{
-	float: left;
-	padding-right: 10px;
+
+label {
+    float: left;
+    padding-right: 10px;
 }
-.date-input{
-	margin-left: 31px;
-	float: left;
+
+.date-input {
+    margin-left: 31px;
+    float: left;
 }
+
 /* Paginator */
 .paginator {
     width: 300px;
@@ -238,13 +252,13 @@ label{
     margin: auto;
 }
 
-.paginator a{
+.paginator a {
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 10px;
     font: 18px/260% Times, serif;
     text-align: center;
-    background-color:#0807b1;
+    background-color: #0807b1;
     color: #ffffff;
 }
 

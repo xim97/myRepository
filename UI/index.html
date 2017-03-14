@@ -2,80 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Главная страница</title> 
-    <link href = "styles.css" rel = "stylesheet"/>
-    <script src = "script.js" async></script>
+    <title>Главная страница</title>
+    <link href="styles.css" rel="stylesheet"/>
+    <script src="script.js" async></script>
 </head>
 <body>
-    <header>
-        <span class = "title">Лента новостей</span>
-        <div class = "header-actions">            
-            <span class = "user-name">Гость</span>
-            <a class = "login-logout-buttom" href = "#">Войти</a>
-            
-        </div>
-    </header>
-    <div>
-    <span class = "add-article-holder"></span>
+<header>
+    <span class="title">Лента новостей</span>
+    <div class="header-actions">
+        <span class="user-name">Гость</span>
+        <a class="login-logout-button" href="#">Войти</a>
+
     </div>
-    <div class = "article-list">Новости</div>
-    <div class = "filters">
-        <h1>Фильтры</h1>
-        <div class = "author-filter">
-            <h2>По автору:</h2>
-            <input type = "text" name = "author-input" placeholder = "Автор">
-            <a class = "confirm-filter" href = "#">Применить</a>
-        </div>
-        <div class="date-filter">
-            <h2>По дате добавления:</h2>
-            <div class="date-input">
-                <div class="date-filter-input">
-                   <label>С:</label>
-                   <input type="date" name="dateFrom" tabindex="2">
-                </div>
-                <div class="date-filter-input">
-                    <label>По:</label>
-                    <input type="date" name="dateTo" tabindex="3">
-                </div>
+</header>
+<div>
+    <span class="add-article-holder"></span>
+</div>
+<div class="article-list">Новости</div>
+<div class="filters">
+    <h1>Фильтры</h1>
+    <div class="author-filter">
+        <h2>По автору:</h2>
+        <input type="text" name="author-input" placeholder="Автор">
+        <a class="confirm-filter" href="#">Применить</a>
+    </div>
+    <div class="date-filter">
+        <h2>По дате добавления:</h2>
+        <div class="date-input">
+            <div class="date-filter-input">
+                <label>С:</label>
+                <input type="date" name="dateFrom" tabindex="2">
             </div>
-            <a class="confirm-filter" href="#">Применить</a>
+            <div class="date-filter-input">
+                <label>По:</label>
+                <input type="date" name="dateTo" tabindex="3">
+            </div>
         </div>
-        <div class = "tags-filter">
-            <h2>По тегам:</h2>
-            <input type = "text" name = "tagsInput" placeholder = "Теги через запятую">
-            <a class = "confirm-filter" href = "#">Применить</a>
-        </div>
+        <a class="confirm-filter" href="#">Применить</a>
     </div>
-    <div class = "paginator">
-        <a href = "#">Показать ещё</a>        
+    <div class="tags-filter">
+        <h2>По тегам:</h2>
+        <input type="text" name="tagsInput" placeholder="Теги через запятую">
+        <a class="confirm-filter" href="#">Применить</a>
     </div>
-    <template id = "template-article">
-        <div class = "article" data-id = "id">
-            <div class = "article-header">
-                <h1 class = "title">Заголовок</h1>
-                <div class = "date">Дата</div>
-                <div class = "author">Автор</div> 
-                <p class = "summary">Текст</p>               
-                <div class = "tag-list">Список тегов</div>
-            </div>            
-            <div class = "article-actions"></div>
+</div>
+<div class="paginator">
+    <a href="#">Показать ещё</a>
+</div>
+<template id="template-article">
+    <div class="article" data-id="id">
+        <div class="article-header">
+            <h1 class="title">Заголовок</h1>
+            <div class="date">Дата</div>
+            <div class="author">Автор</div>
+            <p class="summary">Текст</p>
+            <div class="tag-list">Список тегов</div>
         </div>
-    </template>
-    <template id = "template-tag">
-        <span class = "tag">Тег</span>
-    </template>
-    <template id = "template-add-article">
-        <a class = "add-article-buttom" href = "#">Добавить новость</a>
-    </template>
-    <template id = "template-view-button">
-        <a class = "view-button" href = "#">Показать новость</a>
-    </template>
-    <template id = "template-edit-button">
-        <a class = "edit-button" href = "#">Редактировать</a>
-    </template>
-    <template id = "template-delete-button">
-        <a class = "delete-button" href = "#">Удалить</a>
-    </template>
-    <footer>&copy;Новостной портал. Ефимович Максим Геннадьевич fpm.efimovic@bsu.by 14.03.2017</footer>
+        <div class="article-actions"></div>
+    </div>
+</template>
+<template id="template-tag">
+    <span class="tag">Тег</span>
+</template>
+<template id="template-add-article">
+    <a class="add-article-button" href="#">Добавить новость</a>
+</template>
+<template id="template-view-button">
+    <a class="view-button" href="#">Показать новость</a>
+</template>
+<template id="template-edit-button">
+    <a class="edit-button" href="#">Редактировать</a>
+</template>
+<template id="template-delete-button">
+    <a class="delete-button" href="#">Удалить</a>
+</template>
+<footer>&copy;Новостной портал. Ефимович Максим Геннадьевич fpm.efimovic@bsu.by 14.03.2017</footer>
 </body>
 </html>
