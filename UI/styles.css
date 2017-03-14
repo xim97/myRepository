@@ -27,10 +27,6 @@ body {
     background: #16b4bc;
 }
 
-a {
-    color: #cd7f32;
-}
-
 h1 {
     color: #000000;
     font: 25px/30px Times, serif;
@@ -44,52 +40,48 @@ h2 {
 h3 {
     font: 16px/18px Times, serif;
 }
-
 input {
-    color: #d4d2cf;
+	color: #d4d2cf;
 }
 article{
-	margin-left: -1%;
+	margin-left:  -1%;
 }
 /* Header */
 header {
     width: 100%;
     color: #000000;
-    background-color: #9916bc;   
-    
+    background-color: #9916bc;     
 }
 p {
 	margin: 5px;
 }
 /* Type of page */
-.title {
-    margin-left: 1%;
+.title {    
     font: 30px/30px fantasy;        
 }
-.feed {
-	margin-top: 10px;
-	margin-left: 25px;
-	font: 25px/20px fantasy;
-}
+
 /* Actions */
-.actions {    
+.header-actions {
+    width: 50%;
     margin-right: 1%;
     float: right;
     text-align: right;
 }
-.add {    
-	margin-right: 1%;
+
+.add-article-buttom {
+	margin-top: 0.5%;	
+    margin-right: 4%;
 	float: right;    
    	padding-right: 5px;
    	padding-left: 5px;
     border-radius: 8px;
-    font: 20px/30px Times, serif;
+    font: 20px/25px Times, serif;
     text-align: center;
     background-color:#0807b1;
     color: #ffffff;
 }
 
-.user-name {	
+.user-name {
     margin-right: 3%;
     font: 20px/30px Times, serif;
     text-align: center;
@@ -100,7 +92,8 @@ p {
     color: #ffffff;
 }
 
-.logout-buttom {
+.login-logout-buttom {
+	margin-right: 3%;
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 10px;
@@ -111,38 +104,38 @@ p {
 }
 
 /* News */
-.news {
+.article-list {
     float: left;
     width: 75%;
     margin: 2%;
 }
 
-.news-summary {
-	margin-left: -1px;
+.article-list p {
+ 	margin-left: -1px;
     padding: 2px;
     background-color: #e0dbd2;
     border-radius: 5px;
     box-shadow: 0 0 5px #000000;
 }
 
-.news-title {	
+.article-header {
     padding: 0.5%;
     color: #000000;
     border-radius: 5px;
     box-shadow: 0 0 2px #000000;
 }
 
-.author {   
+.author {
     width: 50%;
-    font: 16px/16px Times, serif;    
+    font: 16px/16px Times, serif;
 }
 
-.date {    
+.date {
     width: 50%;
-    font: 16px/16px Times, serif;    
+    font: 16px/16px Times, serif;
 }
 
-.tags {
+.tag {
     width: 100%;
     margin-right: 10px;
     border-radius: 2px;
@@ -152,11 +145,12 @@ p {
     background: #e0dbd2;
 }
 
-.news-actions {
+.article-actions {
     text-align: right;
 }
 
-.view-button {    
+.view-button {
+	margin-right: 1%;
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 10px;
@@ -167,6 +161,7 @@ p {
 }
 
 .edit-button {
+	margin-right: 1%;
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 10px;
@@ -176,7 +171,8 @@ p {
     color: #ffffff;
 }
 
-.delete-button {    
+.delete-button {
+	margin-right: 1%;
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 10px;
@@ -185,29 +181,22 @@ p {
     background-color:#0807b1;
     color: #ffffff;
 }
-
-/* Filters */
-.filters {
+/*Filters*/
+.filters{
     float: right;
     width: 20%;
-    height: 340px;
+    height: 360px;
     margin-top: 1%; 
-    margin-right: 13px;   
+    margin-right: 10px;   
     color: #000000;
     border-radius: 10px;
     background-color: #9916bc;
     text-align: center;
-    box-shadow: 0 0 5px #000000;    
+    box-shadow: 0 0 5px #000000
 }
-
 .filters h1 {
     color: #000000;
 }
-
-.filters a:hover {
-    -webkit-box-shadow: 0 0 10px 1px #cd7f32;
-}
-
 .author-filter input,
 .tags-filter input {
     margin: 8px;
@@ -246,16 +235,17 @@ label{
 .paginator {
     width: 300px;
     padding: 10px;
-    margin: auto;    
+    margin: auto;
 }
 
-.paginator a,
-.paginator span {
-    display: inline-block;
-    height: 40px;
-    min-width: 20px;
-    padding: 0 5px;
-    color: #000000;    
+.paginator a{
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 10px;
+    font: 18px/260% Times, serif;
+    text-align: center;
+    background-color:#0807b1;
+    color: #ffffff;
 }
 
 /* Footer */
@@ -265,5 +255,5 @@ footer {
     text-align: center;
     color: #000000;
     background-color: #9916bc;
-    font: 15px/20px Times, serif;
+    font: 15px/20px fantasy;
 }
