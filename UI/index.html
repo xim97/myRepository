@@ -18,12 +18,18 @@
 <div>
     <span class="add-article-holder"></span>
 </div>
+<div>
+    <span class="login-holder"></span>
+</div>
+<div>
+    <span class="article-edit-holder"></span>
+</div>
 <div class="article-list">Новости</div>
 <div class="filters">
     <h1>Фильтры</h1>
     <div class="author-filter">
         <h2>По автору:</h2>
-        <input type="text" name="author-input" placeholder="Автор">
+        <input type="text" name="author-input" placeholder="Автор" tabindex="1">
         <a class="confirm-filter" href="#">Применить</a>
     </div>
     <div class="date-filter">
@@ -31,23 +37,27 @@
         <div class="date-input">
             <div class="date-filter-input">
                 <label>С:</label>
-                <input type="date" name="dateFrom" tabindex="2">
+                <input type="date" name="date-from" tabindex="2">
             </div>
             <div class="date-filter-input">
                 <label>По:</label>
-                <input type="date" name="dateTo" tabindex="3">
+                <input type="date" name="date-to" tabindex="3">
             </div>
         </div>
         <a class="confirm-filter" href="#">Применить</a>
     </div>
     <div class="tags-filter">
         <h2>По тегам:</h2>
-        <input type="text" name="tagsInput" placeholder="Теги через запятую">
+        <input type="text" name="tags-input" placeholder="Теги через запятую" tabindex="4">
         <a class="confirm-filter" href="#">Применить</a>
     </div>
+    <a class="reset-button" href="#">Сбросить фильтры</a>
 </div>
 <div class="paginator">
     <a href="#">Показать ещё</a>
+</div>
+<div >
+    <a class="main-page-button" href="index.html">На главную</a>
 </div>
 <template id="template-article">
     <div class="article" data-id="id">
@@ -55,7 +65,7 @@
             <h1 class="title">Заголовок</h1>
             <div class="date">Дата</div>
             <div class="author">Автор</div>
-            <p class="summary">Текст</p>
+            <p class="text">Текст</p>
             <div class="tag-list">Список тегов</div>
         </div>
         <div class="article-actions"></div>
@@ -76,6 +86,31 @@
 <template id="template-delete-button">
     <a class="delete-button" href="#">Удалить</a>
 </template>
-<footer>&copy;Новостной портал. Ефимович Максим Геннадьевич fpm.efimovic@bsu.by 14.03.2017</footer>
+<template id="template-edit-article">
+    <div class="article" data-id="id">
+        <div class="article-header">
+            <input type="text" name="title">
+            <div class="date"></div>
+            <div class="author"></div>
+            <p class="text"></p>
+            <div class="tag-list"> тегов</div>
+        </div>
+    </div>
+</template>
+<template id="template-login">
+    <div class="login-page-fields">
+        <div class="login-page-field">
+            <label class="login-page-label">Логин: </label>
+            <input type="text" name="login-input" tabindex="1">
+        </div>
+        <div class="login-page-field">
+            <label class="login-page-label">Пароль: </label>
+            <input type="text" name="password-input" tabindex="2">
+        </div>
+        <a class="login-button" href="#">Авторизация</a>
+        <a class="main-page-button" href="index.html">На главную</a>
+    </div>
+</template>
+<footer>&copy;Новостной портал. Ефимович Максим Геннадьевич, 2 курс 6 группа, fpm.efimovic@bsu.by 14.03.2017</footer>
 </body>
 </html>
