@@ -336,3 +336,17 @@ footer {
     color: #ffffff;
     margin-left: 35%;
 }
+.input-title{
+    width: 600px;
+}
+
+.accept-button{
+    display: none;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+    font: 18px/260% Times, serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}

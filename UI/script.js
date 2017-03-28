@@ -132,9 +132,11 @@ var articlesModel = (function () {
                 return false;
             }
         }
+
         function getArticlesLength() {
             return articles.length;
         }
+
         function getTagsLength() {
             return tags.length;
         }
@@ -200,6 +202,7 @@ var articlesRenderer = (function () {
         ARTICLE_TEMPLATE.content.querySelector('.date').textContent = dateToString(article.createdAt);
         ARTICLE_TEMPLATE.content.querySelector('.text').textContent = article.summary;
         TAG_LIST.innerHTML = '';
+        console.log(article.tags);
         article.tags.forEach(function (tag) {
             TAG_TEMPLATE.content.querySelector('.tag').textContent = tag;
             TAG_LIST.appendChild(TAG_TEMPLATE.content.querySelector('.tag').cloneNode(true));
@@ -291,7 +294,7 @@ function startApp() {
 
 function renderArticles(from, to) {
     articlesRenderer.removeArticlesFromDom();
-    articlesRenderer.insertArticlesInDOM(articlesModel.getArticles(from, to));
+    articlesRenderer.insertArticlesInDOM(articlesModel.getArticles());
 }
 
 function addArticle(article) {
@@ -355,7 +358,7 @@ function handleLoginLogoutButton() {
 function handleAuthButton() {
     var loginInput = document.getElementsByName('login-input')[0];
     var passwordInput = document.getElementsByName('password-input')[0];
-    if (validateUser(loginInput.value, passwordInput.value) == true){
+    if (validateUser(loginInput.value, passwordInput.value) == true) {
         user = loginInput.value;
         var paginator = document.querySelector('.paginator');
         var filter = document.querySelector('.filters');
@@ -375,31 +378,30 @@ function validateUser(login, password) {
 var filterButton = document.querySelectorAll('.confirm-filter');
 function handleFilterButtonClick(event) {
     var tempArticles;
-    switch (event.target.parentNode.className){
-        case 'author-filter':{
+    switch (event.target.parentNode.className) {
+        case 'author-filter': {
             var authorInput = document.getElementsByName('author-input')[0];
-            tempArticles = articlesModel.getArticles(0, 10, {author:authorInput.value.toString()});
+            tempArticles = articlesModel.getArticles(0, 10, {author: authorInput.value.toString()});
         }
-        case 'date-filter':{
+        case 'date-filter': {
             /*var dateFromInput = document.getElementsByName('date-from')[0];
-            var dateToInput = document.getElementsByName('date-to')[0];
-            console.log(new Date(dateToInput.value));
-            tempArticles = articlesModel.getArticles(0, 10, {dateFrom:new Date(dateFromInput.value),
-                dateTo:new Date(dateToInput.value)});*/
+             var dateToInput = document.getElementsByName('date-to')[0];
+             console.log(new Date(dateToInput.value));
+             tempArticles = articlesModel.getArticles(0, 10, {dateFrom:new Date(dateFromInput.value),
+             dateTo:new Date(dateToInput.value)});*/
             break;
         }
-        case 'tags-filter':{
+        case 'tags-filter': {
             var tagsInput = document.getElementsByName('tags-input')[0];
             var tempTags = tagsInput.value.split(',');
             tempTags.forEach(function (curTag) {
-               curTag.trim();
+                curTag.trim();
             });
-            tempArticles = articlesModel.getArticles(0, 10, articlesModel.getTagsLength(), {tags:[tempTags.toString()]});
+            tempArticles = articlesModel.getArticles(0, 10, articlesModel.getTagsLength(), {tags: [tempTags.toString()]});
             break;
         }
     }
-    if (tempArticles.length > 0)
-    {
+    if (tempArticles.length > 0) {
         articlesRenderer.removeArticlesFromDom();
         articlesRenderer.insertArticlesInDOM(tempArticles);
     }
@@ -432,6 +434,7 @@ function handleAddButtonClick() {
     btn.addEventListener('click', handleAddButtonClick);
 });
 
+var acceptButton;
 var editButton = document.querySelectorAll('.edit-button');
 function handleEditButtonClick(event) {
     var EDIT_TEMPLATE = document.querySelector('#template-edit-article');
@@ -444,23 +447,60 @@ function handleEditButtonClick(event) {
     mainPageButton.style.display = 'inline';
     paginator.style.display = 'none';
     filter.style.display = 'none';
-    console.log(event.target.parentElement.parentElement.dataset.id);
     var tempArticle = articlesModel.getArticle(event.target.parentElement.parentElement.dataset.id);
     EDIT_TEMPLATE.content.querySelector('.article').dataset.id = tempArticle.id;
-    /*.content.querySelector('.title').textContent = tempArticle.title;*/
+    EDIT_TEMPLATE.content.querySelector('.input-title').value = tempArticle.title;
     EDIT_TEMPLATE.content.querySelector('.author').textContent = tempArticle.author;
     EDIT_TEMPLATE.content.querySelector('.date').textContent =
         articlesRenderer.dateToString(tempArticle.createdAt);
-    EDIT_TEMPLATE.content.querySelector('.text').textContent = tempArticle.summary;
-    var TAG_TEMPLATE = document.querySelector('#template-tag');
-    var TAG_LIST = EDIT_TEMPLATE.content.querySelector('.tag-list');
-    TAG_LIST.innerHTML = '';
-    tempArticle.tags.forEach(function (tag) {
-        TAG_TEMPLATE.content.querySelector('.tag').textContent = tag;
-        TAG_LIST.appendChild(TAG_TEMPLATE.content.querySelector('.tag').cloneNode(true));
-    });
+    EDIT_TEMPLATE.content.querySelector('.input-text').value = tempArticle.summary;
+    if (tempArticle.tags[0] != null) {
+        EDIT_TEMPLATE.content.querySelector('.input-tag1').value = tempArticle.tags[0];
+    }
+    if (tempArticle.tags[1] != null) {
+        EDIT_TEMPLATE.content.querySelector('.input-tag2').value = tempArticle.tags[1];
+    }
+    if (tempArticle.tags[2] != null) {
+        EDIT_TEMPLATE.content.querySelector('.input-tag3').value = tempArticle.tags[2];
+    }
+    if (tempArticle.tags[3] != null) {
+        EDIT_TEMPLATE.content.querySelector('.input-tag4').value = tempArticle.tags[3];
+    }
+    if (tempArticle.tags[4] != null) {
+        EDIT_TEMPLATE.content.querySelector('.input-tag5').value = tempArticle.tags[4];
+    }
+    EDIT_TEMPLATE.content.querySelector('.accept-button').style.display = 'inline';
     EDIT_HOLDER.appendChild(EDIT_TEMPLATE.content.querySelector('.article').cloneNode(true));
+    acceptButton = document.querySelector('.accept-button');
+    acceptButton.addEventListener('click', handleAcceptButtonClick);
 }
 [].forEach.call(editButton, function (btn) {
     btn.addEventListener('click', handleEditButtonClick);
 });
+
+function handleAcceptButtonClick(event) {
+    var articleId = event.target.parentElement.dataset.id;
+    var EDIT_TEMPLATE = document.querySelector('#template-edit-article');
+    var title1 = EDIT_TEMPLATE.content.querySelector('.input-title').value;
+    var summary1 = EDIT_TEMPLATE.content.querySelector('.input-text').value;
+    var tags1 = {};
+    console.log('af');
+    if (EDIT_TEMPLATE.content.querySelector('.input-tag1').value != null) {
+        tags1[0] = EDIT_TEMPLATE.content.querySelector('.input-tag1').value;
+    }
+    if (EDIT_TEMPLATE.content.querySelector('.input-tag2').value != null) {
+        tags1[1] = EDIT_TEMPLATE.content.querySelector('.input-tag2').value;
+    }
+    if (EDIT_TEMPLATE.content.querySelector('.input-tag3').value != null) {
+        tags1[2] = EDIT_TEMPLATE.content.querySelector('.input-tag3').value;
+    }
+    if (EDIT_TEMPLATE.content.querySelector('.input-tag4').value != null) {
+        tags1[3] = EDIT_TEMPLATE.content.querySelector('.input-tag4').value;
+    }
+    if (EDIT_TEMPLATE.content.querySelector('.input-tag5').value != null) {
+        tags1[4] = EDIT_TEMPLATE.content.querySelector('.input-tag5').value;
+    }
+    if (articlesModel.editArticle(articleId, {title: title1, summary: summary1, tags: {tags1}}) == false) {
+        alert('Введённая статья не является валидной');
+    }
+}

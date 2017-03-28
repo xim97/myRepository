@@ -89,12 +89,22 @@
 <template id="template-edit-article">
     <div class="article" data-id="id">
         <div class="article-header">
-            <input type="text" name="title">
+            <input class ="input-title" type="text" name="title">
             <div class="date"></div>
             <div class="author"></div>
-            <p class="text"></p>
-            <div class="tag-list"> тегов</div>
+            <textarea rows="10" cols="100" type="text" class="input-text"></textarea>
+            <br>
+            <input type="text" class="input-tag1">
+            <br>
+            <input type="text" class="input-tag2">
+            <br>
+            <input type="text" class="input-tag3">
+            <br>
+            <input type="text" class="input-tag4">
+            <br>
+            <input type="text" class="input-tag5">
         </div>
+        <a class="accept-button" href="#">Принять</a>
     </div>
 </template>
 <template id="template-login">
