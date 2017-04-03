@@ -1,0 +1,22 @@
+{
+  "name": "practice",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xim97/myRepository.git"
+  },
+  "author": "xim97",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xim97/myRepository/issues"
+  },
+  "homepage": "https://github.com/xim97/myRepository#readme",
+  "dependencies": {
+    "express": "^4.15.2"
+  }
+}
