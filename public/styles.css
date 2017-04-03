@@ -1,0 +1,353 @@
+@charset "UTF-8";
+/* RESET */
+html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, address, cite, code, del,
+dfn, em, font, img, ins, kbd, q, samp, small, strong, sub, sup, var, dl, dt, dd, ol, ul, li, fieldset, form, label,
+legend, table, caption, tbody, tfoot, thead, tr, th, td, header, nav, article, aside, footer, hgroup, section {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-weight: inherit;
+    font-style: inherit;
+    font-size: 100%;
+    font-family: inherit;
+    text-decoration: none;
+}
+
+html {
+    background-color: rgb(237, 231, 222);
+}
+
+body {
+    min-width: 1000px;
+    width: 100%;
+    margin: auto;
+    font: 16px/18px Times, serif;
+    text-align: justify;
+    background: #16b4bc;
+}
+
+h1 {
+    color: #000000;
+    font: 25px/30px Times, serif;
+}
+
+h2 {
+    margin: 4px;
+    font: 18px/20px Times, serif;
+}
+
+h3 {
+    font: 16px/18px Times, serif;
+}
+
+input {
+    color: #000000;
+}
+
+article {
+    margin-left: -1%;
+}
+
+/* Header */
+header {
+    width: 100%;
+    color: #000000;
+    background-color: #9916bc;
+}
+
+p {
+    margin: 5px;
+}
+
+/* Type of page */
+.title {
+    font: 30px/30px fantasy;
+}
+
+/* Actions */
+.header-actions {
+    width: 50%;
+    margin-right: 1%;
+    float: right;
+    text-align: right;
+}
+
+.add-article-button {
+    margin-top: 0.5%;
+    margin-right: 4%;
+    float: right;
+    padding-right: 5px;
+    padding-left: 5px;
+    border-radius: 8px;
+    font: 20px/25px Times, serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+.user-name {
+    margin-right: 3%;
+    font: 20px/30px Times, serif;
+    text-align: center;
+    padding-right: 5px;
+    padding-left: 5px;
+    border-radius: 10px;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+.login-logout-button {
+    margin-right: 3%;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 10px;
+    font: 20px/30px Times, serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+/* News */
+.article-list {
+    float: left;
+    width: 75%;
+    margin-top: 2%;
+    margin-left: 2%;
+
+}
+
+.text {
+    margin-left: -1px;
+    padding: 2px;
+    background-color: #e0dbd2;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #000000;
+}
+
+.article-header {
+    padding: 0.5%;
+    color: #000000;
+    border-radius: 5px;
+    box-shadow: 0 0 2px #000000;
+}
+
+.author {
+    width: 50%;
+    font: 16px/16px Times, serif;
+}
+
+.date {
+    width: 50%;
+    font: 16px/16px Times, serif;
+}
+
+.tag {
+    width: 100%;
+    margin-right: 10px;
+    border-radius: 2px;
+    font: 15px/20px Times, serif;
+    box-shadow: 0 0 5px #000000;
+    padding: 1px;
+    background: #e0dbd2;
+}
+
+.article-actions {
+    text-align: right;
+}
+
+.view-button {
+    margin-right: 1%;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 10px;
+    font: 18px/260% Times, serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+.edit-button {
+    margin-right: 1%;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 10px;
+    font: 18px/260% Times, serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+.delete-button {
+    margin-right: 1%;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 10px;
+    font: 18px/260% Times, serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+/*Filters*/
+.filters {
+    float: right;
+    width: 20%;
+    height: 370px;
+    margin-top: 1%;
+    margin-right: 10px;
+    color: #000000;
+    border-radius: 10px;
+    background-color: #9916bc;
+    text-align: center;
+    box-shadow: 0 0 5px #000000
+}
+
+.filters h1 {
+    color: #000000;
+}
+
+.author-filter input,
+.tags-filter input {
+    margin: 8px;
+    width: 48%;
+    color: #000000;
+}
+
+.date-filter input {
+    width: 75%;
+}
+
+.confirm-filter {
+    margin-left: 20%;
+    margin-right: 20%;
+    width: 30%;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 10px;
+    font: 18px/23px Times, serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+.reset-button {
+    margin-left: 20%;
+    margin-right: 20%;
+    width: 30%;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 10px;
+    font: 18px/23px Times, serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+.date-filter-input {
+    clear: both;
+    text-align: right;
+    line-height: 40px;
+}
+
+.date-filter-input label {
+    float: left;
+    padding-right: 10px;
+}
+
+.date-input {
+    margin-left: 31px;
+    float: left;
+}
+
+/* Paginator */
+.paginator {
+    width: 300px;
+    padding: 10px;
+    margin: auto;
+}
+
+.paginator a {
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 10px;
+    font: 18px/260% Times, serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+/* Footer */
+footer {
+    clear: both;
+    width: 100%;
+    text-align: center;
+    color: #000000;
+    background-color: #9916bc;
+    font: 15px/20px fantasy;
+}
+
+/* Styles for login page*/
+.login-page-field {
+    clear: both;
+    text-align: right;
+    line-height: 45px;
+}
+
+.login-page-field input {
+    color: #000000;
+}
+
+.login-page-label {
+    font: 18px/260% Times, serif;
+    float: left;
+    padding-right: 10px;
+}
+
+.login-page-fields {
+    float: left;
+    margin-left: 30%;
+}
+
+.login-button {
+    padding: 10px 30px 10px 30px;
+    border-radius: 10px;
+    font: 18px/260% Times, serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+/* Error page*/
+.error-page h1 {
+    margin-left: 35%;
+}
+
+.error-image {
+    margin-left: 30%;
+}
+
+.main-page-button {
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+    font: 18px/260% Times, serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+    margin-left: 35%;
+}
+
+.input-title {
+    width: 600px;
+}
+
+.accept-button {
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+    font: 18px/260% Times, serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
