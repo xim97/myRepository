@@ -7,14 +7,145 @@
 /* eslint-disable no-alert */
 /* eslint-disable func-names */
 /* eslint-disable prefer-const */
+/* eslint-disable no-console */
+/* eslint-disable no-useless-concat */
 
 let user = '1';
+const httpRequests = (function () {
+    function httpGet(url) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+
+            function loadHandler() {
+                if (this.status >= 200 && this.status < 300) {
+                    resolve(this.responseText);
+                } else {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText,
+                    });
+                }
+                cleanUp();
+            }
+
+            function cleanUp() {
+                xhr.removeEventListener('load', loadHandler);
+            }
+
+            xhr.addEventListener('load', loadHandler);
+            xhr.open('GET', url);
+            xhr.send();
+        });
+    }
+
+    function httpDeleteArticle(id) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            let article = articlesService.getArticle(id);
+            if (confirm(`Удалить новость: ${article.title}?`)) {
+                xhr.open('DELETE', '/article');
+                xhr.setRequestHeader('content-type', 'application/json');
+                xhr.send(JSON.stringify({
+                    id,
+                }));
+                xhr.onload = function () {
+                    if (this.status >= 200 && this.status < 300) {
+                        resolve(this.responseText);
+                    } else {
+                        reject({
+                            status: this.status,
+                            statusText: xhr.statusText,
+                        });
+                    }
+                };
+            }
+        });
+    }
+
+    function httpPostArticle(article) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/article');
+            xhr.setRequestHeader('content-type', 'application/json');
+            xhr.send(JSON.stringify(article));
+            xhr.onload = function () {
+                if (this.status >= 200 && this.status < 300) {
+                    resolve(this.responseText);
+                } else {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText,
+                    });
+                }
+            };
+        });
+    }
+
+    function httpPostTag(tag) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/tag');
+            xhr.setRequestHeader('content-type', 'application/json');
+            xhr.send(JSON.stringify({
+                tag,
+            }));
+            xhr.onload = function () {
+                if (this.status >= 200 && this.status < 300) {
+                    resolve(this.responseText);
+                } else {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText,
+                    });
+                }
+            };
+        });
+    }
+
+    function httpPutArticle(article) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', '/article');
+            xhr.setRequestHeader('content-type', 'application/json');
+            xhr.send(JSON.stringify(article));
+            xhr.onload = function () {
+                if (this.status >= 200 && this.status < 300) {
+                    resolve(this.responseText);
+                } else {
+                    reject({
+                        status: this.status,
+                        statusText: xhr.statusText,
+                    });
+                }
+            };
+        });
+    }
+
+    return {
+        httpGet,
+        httpDeleteArticle,
+        httpPostArticle,
+        httpPostTag,
+        httpPutArticle,
+    };
+}());
 
 const articlesModel = (function () {
   let articles;
   let tags;
-  loadArticles();
-  loadTags();
+  loadArticlesTags();
+  function loadArticlesTags() {
+      Promise.all([httpRequests.httpGet('/article'), httpRequests.httpGet('/tags')]).then(values => {
+          articles = JSON.parse(values[0], (key, value) => {
+              if (key === 'createdAt') {
+                  return new Date(value);
+              }
+              return value;
+          });
+          tags = JSON.parse(values[1]);
+      });
+  }
+
 
   function getArticles(skip, top, filterConfig) {
     if (!Number.isFinite(skip)) {
@@ -25,7 +156,9 @@ const articlesModel = (function () {
     }
     return articles.filter((currentArticle) => {
       let result = true;
-
+      if (currentArticle.isHidden === true) {
+        result = false;
+      }
       if (filterConfig !== undefined) {
         if (filterConfig.author !== undefined) {
           result = (currentArticle.author === filterConfig.author);
@@ -70,14 +203,15 @@ const articlesModel = (function () {
   }
 
   function editArticle(editId, newArticle) {
-    const editIndex = articles.indexOf(getArticle(editId));
-    if (!validateArticle(newArticle) || editIndex === -1) {
+    console.log(newArticle);
+    console.log(editId);
+    if (!validateArticle(newArticle) || editId === -1) {
       return false;
     }
-    articles[editIndex].title = newArticle.title;
-    articles[editIndex].summary = newArticle.summary;
-    articles[editIndex].tags = newArticle.tags;
-    articles[editIndex].content = newArticle.content;
+    articles[editId].title = newArticle.title;
+    articles[editId].summary = newArticle.summary;
+    articles[editId].tags = newArticle.tags;
+    articles[editId].content = newArticle.content;
     localStorage.setItem('articles', JSON.stringify(articles));
     return true;
   }
@@ -145,45 +279,6 @@ const articlesModel = (function () {
     if (article !== undefined) {
       article.isHidden = true;
     }
-  }
-
-  function loadArticles() {
-    const xhr = new XMLHttpRequest();
-
-    function loadHandler() {
-      articles = JSON.parse(this.responseText, (key, value) => {
-        if (key === 'createdAt') {
-          return new Date(value);
-        }
-        return value;
-      });
-      cleanUp();
-    }
-
-    function cleanUp() {
-      xhr.removeEventListener('load', loadHandler);
-    }
-
-    xhr.addEventListener('load', loadHandler);
-    xhr.open('GET', '/article', false);
-    xhr.send();
-  }
-
-  function loadTags() {
-    const xhr = new XMLHttpRequest();
-
-    function loadHandler() {
-      tags = JSON.parse(this.responseText);
-      cleanUp();
-    }
-
-    function cleanUp() {
-      xhr.removeEventListener('load', loadHandler);
-    }
-
-    xhr.addEventListener('load', loadHandler);
-    xhr.open('GET', '/tags', false);
-    xhr.send();
   }
 
   function sendNewArticle(article) {
@@ -520,19 +615,19 @@ function handleEditButtonClick(event) {
         articlesRenderer.dateToString(tempArticle.createdAt);
   EDIT_TEMPLATE.content.querySelector('.input-summary').value = tempArticle.summary;
   EDIT_TEMPLATE.content.querySelector('.input-content').value = tempArticle.content;
-  if (tempArticle.tags[0] !== null) {
+  if (tempArticle.tags[0] !== undefined) {
     EDIT_TEMPLATE.content.querySelector('.input-tag1').value = tempArticle.tags[0];
   }
-  if (tempArticle.tags[1] !== null) {
+  if (tempArticle.tags[1] !== undefined) {
     EDIT_TEMPLATE.content.querySelector('.input-tag2').value = tempArticle.tags[1];
   }
-  if (tempArticle.tags[2] !== null) {
+  if (tempArticle.tags[2] !== undefined) {
     EDIT_TEMPLATE.content.querySelector('.input-tag3').value = tempArticle.tags[2];
   }
-  if (tempArticle.tags[3] !== null) {
+  if (tempArticle.tags[3] !== undefined) {
     EDIT_TEMPLATE.content.querySelector('.input-tag4').value = tempArticle.tags[3];
   }
-  if (tempArticle.tags[4] !== null) {
+  if (tempArticle.tags[4] !== undefined) {
     EDIT_TEMPLATE.content.querySelector('.input-tag5').value = tempArticle.tags[4];
   }
   EDIT_TEMPLATE.content.querySelector('.accept-button').style.display = 'inline';
@@ -545,43 +640,55 @@ function handleEditButtonClick(event) {
 });
 
 function handleAcceptButtonClick(event) {
-  const articleId = event.target.parentElement.dataset.id;
-  const EDIT_TEMPLATE = document.querySelector('#template-edit-article');
-  const title = EDIT_TEMPLATE.content.querySelector('.input-title').value;
-  const summary = EDIT_TEMPLATE.content.querySelector('.input-summary').value;
-  const content = EDIT_TEMPLATE.content.querySelector('.input-content').value;
   let tag1;
   let tag2;
   let tag3;
   let tag4;
   let tag5;
-  if (EDIT_TEMPLATE.content.querySelector('.input-tag1').value !== null) {
-    tag1 = EDIT_TEMPLATE.content.querySelector('.input-tag1').value;
+  let tags = [];
+  const articleId = event.target.parentElement.dataset.id;
+  const EDIT_TEMPLATE = document.querySelector('#template-edit-article');
+  const title = document.querySelector('.input-title').value;
+  const summary = document.querySelector('.input-summary').value;
+  const content = document.querySelector('.input-content').value;
+  if (document.querySelector('.input-tag1').value !== null) {
+    tag1 = document.querySelector('.input-tag1').value;
+    tags.push(tag1);
   }
-  if (EDIT_TEMPLATE.content.querySelector('.input-tag2').value !== null) {
-    tag2 = EDIT_TEMPLATE.content.querySelector('.input-tag2').value;
+  if (document.querySelector('.input-tag2').value !== null) {
+    tag2 = document.querySelector('.input-tag2').value;
+    tags.push(tag2);
   }
-  if (EDIT_TEMPLATE.content.querySelector('.input-tag3').value !== null) {
-    tag3 = EDIT_TEMPLATE.content.querySelector('.input-tag3').value;
+  if (document.querySelector('.input-tag3').value !== null) {
+    tag3 = document.querySelector('.input-tag3').value;
+    tags.push(tag3);
   }
-  if (EDIT_TEMPLATE.content.querySelector('.input-tag4').value !== null) {
-    tag4 = EDIT_TEMPLATE.content.querySelector('.input-tag4').value;
+  if (document.querySelector('.input-tag4').value !== null) {
+    tag4 = document.querySelector('.input-tag4').value;
+    tags.push(tag4);
   }
-  if (EDIT_TEMPLATE.content.querySelector('.input-tag5').value !== null) {
-    tag5 = EDIT_TEMPLATE.content.querySelector('.input-tag5').value;
+  if (document.querySelector('.input-tag5').value !== null) {
+    tag5 = document.querySelector('.input-tag5').value;
+    tags.push(tag5);
   }
+  console.log(title, summary);
   if (editArticle(articleId, {
     title,
     summary,
     content,
-    tags: { tag1, tag2, tag3, tag4, tag5 },
+    tags,
   }) === false) {
     alert('Введённая статья не является валидной');
   }
-  startApp();
+  document.querySelector('.article-edit-holder').removeChild(document.querySelector('.article'));
+  document.querySelector('.main-page-button-holder').removeChild(document.querySelector('.main-page'));
+  renderArticles();
+  document.querySelector('.filters').style.display = 'inline';
+  renderPaginator();
 }
 
 const addButton = document.querySelectorAll('.add-article-button');
+
 function handleAddButtonClick() {
   const EDIT_TEMPLATE = document.querySelector('#template-edit-article');
   const EDIT_HOLDER = document.querySelector('.article-edit-holder');
@@ -615,7 +722,7 @@ function handleAcceptAddButtonClick() {
   const title = EDIT_TEMPLATE.content.querySelector('.input-title').value;
   const summary = EDIT_TEMPLATE.content.querySelector('.input-summary').value;
   const content = EDIT_TEMPLATE.content.querySelector('.input-content').value;
-  const tags = {};
+  const tags = [];
   if (EDIT_TEMPLATE.content.querySelector('.input-tag1').value !== null) {
     tags[0] = EDIT_TEMPLATE.content.querySelector('.input-tag1').value;
   }
@@ -625,10 +732,10 @@ function handleAcceptAddButtonClick() {
   if (EDIT_TEMPLATE.content.querySelector('.input-tag3').value !== null) {
     tags[2] = EDIT_TEMPLATE.content.querySelector('.input-tag3').value;
   }
-  if (EDIT_TEMPLATE.content.querySelector('.input-tag4').value !== null) {
+  if (EDIT_TEMPLATE.content.querySelector('.input-tag4').value !== undefined) {
     tags[3] = EDIT_TEMPLATE.content.querySelector('.input-tag4').value;
   }
-  if (EDIT_TEMPLATE.content.querySelector('.input-tag5').value !== null) {
+  if (EDIT_TEMPLATE.content.querySelector('.input-tag5').value !== undefined) {
     tags[4] = EDIT_TEMPLATE.content.querySelector('.input-tag5').value;
   }
   if (articlesModel.validateArticle({
@@ -639,13 +746,13 @@ function handleAcceptAddButtonClick() {
     content,
     tags,
   }) === true) {
-
+        addArticle({ title, author: user, createdAt: new Date(), summary, content, tags });
   }
 }
 
 const mainPageButton = document.querySelectorAll('.main-page-button');
 function handleMainPageButtonClick() {
-  startApp();
+  renderArticles();
 }
 
 [].forEach.call(mainPageButton, (btn) => {
@@ -655,8 +762,18 @@ function handleMainPageButtonClick() {
 const deleteButton = document.querySelectorAll('.delete-button');
 function handleDeleteButtonClick(event) {
   const articleId = event.target.parentElement.parentElement.dataset.id;
-
-  articlesModel.getArticle(articleId).isHidden = true;
+  console.log(articleId);
+  let confirmDelete = confirm(`${'Удалить статью:' + ' '}${articlesModel.getArticle(articleId).title} ?`);
+  if (confirmDelete === true) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('DELETE', '/article');
+    xhr.setRequestHeader('content-type', 'application/json');
+    xhr.send(JSON.stringify({
+      articleId,
+    }));
+    articlesModel.loadNews();
+    renderArticles();
+  }
 }
 [].forEach.call(deleteButton, (btn) => {
   btn.addEventListener('click', handleDeleteButtonClick);
