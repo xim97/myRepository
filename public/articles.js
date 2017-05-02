@@ -17,7 +17,7 @@ const httpRequests = (function () {
             const xhr = new XMLHttpRequest();
 
             function loadHandler() {
-                if (this.status >= 200 && this.status < 300) {
+                if (this.status === 200) {
                     resolve(this.responseText);
                 } else {
                     reject({
@@ -49,7 +49,7 @@ const httpRequests = (function () {
                     id,
                 }));
                 xhr.onload = function () {
-                    if (this.status >= 200 && this.status < 300) {
+                    if (this.status === 200) {
                         resolve(this.responseText);
                     } else {
                         reject({
@@ -69,7 +69,7 @@ const httpRequests = (function () {
             xhr.setRequestHeader('content-type', 'application/json');
             xhr.send(JSON.stringify(article));
             xhr.onload = function () {
-                if (this.status >= 200 && this.status < 300) {
+                if (this.status === 200) {
                     resolve(this.responseText);
                 } else {
                     reject({
@@ -90,7 +90,7 @@ const httpRequests = (function () {
                 tag,
             }));
             xhr.onload = function () {
-                if (this.status >= 200 && this.status < 300) {
+                if (this.status === 200) {
                     resolve(this.responseText);
                 } else {
                     reject({
@@ -109,7 +109,7 @@ const httpRequests = (function () {
             xhr.setRequestHeader('content-type', 'application/json');
             xhr.send(JSON.stringify(article));
             xhr.onload = function () {
-                if (this.status >= 200 && this.status < 300) {
+                if (this.status === 200) {
                     resolve(this.responseText);
                 } else {
                     reject({
