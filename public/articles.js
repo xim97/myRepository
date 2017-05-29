@@ -10,14 +10,17 @@
 /* eslint-disable no-console */
 /* eslint-disable no-useless-concat */
 
-let user = '1';
+let user = JSON.parse(sessionStorage.getItem('user'));
+let ARTICLES_INDEX_FROM = 0;
+let ARTICLES_INDEX_TO = 10;
+
 const httpRequests = (function () {
     function httpGet(url) {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
 
             function loadHandler() {
-                if (this.status === 200) {
+                if (this.status >= 200 && this.status < 300) {
                     resolve(this.responseText);
                 } else {
                     reject({
@@ -49,7 +52,7 @@ const httpRequests = (function () {
                     id,
                 }));
                 xhr.onload = function () {
-                    if (this.status === 200) {
+                    if (this.status >= 200 && this.status < 300) {
                         resolve(this.responseText);
                     } else {
                         reject({
@@ -62,14 +65,14 @@ const httpRequests = (function () {
         });
     }
 
-    function httpPostArticle(article) {
+    function httpPost(url, obj) {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/article');
+            xhr.open('POST', url);
             xhr.setRequestHeader('content-type', 'application/json');
-            xhr.send(JSON.stringify(article));
+            xhr.send(obj);
             xhr.onload = function () {
-                if (this.status === 200) {
+                if (this.status >= 200 && this.status < 300) {
                     resolve(this.responseText);
                 } else {
                     reject({
@@ -81,35 +84,14 @@ const httpRequests = (function () {
         });
     }
 
-    function httpPostTag(tag) {
+    function httpPut(url, obj) {
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/tag');
+            xhr.open('PUT', url);
             xhr.setRequestHeader('content-type', 'application/json');
-            xhr.send(JSON.stringify({
-                tag,
-            }));
+            xhr.send(obj);
             xhr.onload = function () {
-                if (this.status === 200) {
-                    resolve(this.responseText);
-                } else {
-                    reject({
-                        status: this.status,
-                        statusText: xhr.statusText,
-                    });
-                }
-            };
-        });
-    }
-
-    function httpPutArticle(article) {
-        return new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('PUT', '/article');
-            xhr.setRequestHeader('content-type', 'application/json');
-            xhr.send(JSON.stringify(article));
-            xhr.onload = function () {
-                if (this.status === 200) {
+                if (this.status >= 200 && this.status < 300) {
                     resolve(this.responseText);
                 } else {
                     reject({
@@ -124,657 +106,690 @@ const httpRequests = (function () {
     return {
         httpGet,
         httpDeleteArticle,
-        httpPostArticle,
-        httpPostTag,
-        httpPutArticle,
+        httpPost,
+        httpPut,
     };
 }());
 
-const articlesModel = (function () {
-  let articles;
-  let tags;
-  loadArticlesTags();
-  function loadArticlesTags() {
-      Promise.all([httpRequests.httpGet('/article'), httpRequests.httpGet('/tags')]).then(values => {
-          articles = JSON.parse(values[0], (key, value) => {
-              if (key === 'createdAt') {
-                  return new Date(value);
-              }
-              return value;
-          });
-          tags = JSON.parse(values[1]);
-      });
-  }
+const articlesService = (function () {
+    let articles;
+    let tags;
 
-
-  function getArticles(skip, top, filterConfig) {
-    if (!Number.isFinite(skip)) {
-      skip = 0;
-    }
-    if (!Number.isFinite(top)) {
-      top = 10;
-    }
-    return articles.filter((currentArticle) => {
-      let result = true;
-      if (currentArticle.isHidden === true) {
-        result = false;
-      }
-      if (filterConfig !== undefined) {
-        if (filterConfig.author !== undefined) {
-          result = (currentArticle.author === filterConfig.author);
+    function getArticles(skip, top, filterConfig) {
+        let result = articles;
+        const from = skip || 0;
+        const number = top || 10;
+        result = result.filter(element => !element.isHidden);
+        if (filterConfig) {
+            if (filterConfig.author && filterConfig.author !== '') {
+                result = result.filter(element => element.author === filterConfig.author);
+            }
+            if (filterConfig.dateFrom) {
+                result = result.filter(element => element.createdAt.getTime() >= filterConfig.dateFrom.getTime());
+            }
+            if (filterConfig.dateTo) {
+                result = result.filter(element => element.createdAt.getTime() <= filterConfig.dateTo.getTime());
+            }
+            if (filterConfig.tags && filterConfig.tags.length !== 0) {
+                result = result.filter(element => filterConfig.tags.every(tag => element.tags.indexOf(tag) >= 0));
+            }
         }
-        if (filterConfig.dateFrom !== undefined) {
-          result = result && currentArticle.createdAt.getTime() >= (filterConfig.dateFrom).getTime();
+        articles = result.slice(0, articles.length);
+        return result.slice(from, from + number);
+    }
+
+    function getArticle(findId) {
+        return articles.find(element => element.id === findId);
+    }
+
+    function validateArticle(article) {
+        if (article.id &&
+            (typeof (article.id) !== 'string' || article.id.length === 0) && articles.filter(element => element.id === article.id).length !== 0) {
+            return false;
+        } else if (article.title &&
+            (typeof (article.title) !== 'string' || article.title.length > 100 || article.title.length === 0)) {
+            return false;
+        } else if (article.tags &&
+            (!(article.tags instanceof Array) || article.tags.length === 0 || article.tags.length > 5)) {
+            return false;
+        } else if (article.summary &&
+            (typeof (article.summary) !== 'string' || article.summary.length === 0 || article.summary.length > 200)) {
+            return false;
+        } else if (article.createdAt && !(article.createdAt instanceof Date)) {
+            return false;
+        } else if (article.author && (typeof (article.author) !== 'string' || article.author.length === 0)) {
+            return false;
+        } else if (article.content && (typeof (article.content) !== 'string' || article.content.length === 0)) {
+            return false;
         }
-        if (filterConfig.dateTo !== undefined) {
-          result = result && currentArticle.createdAt.getTime() <= (filterConfig.dateTo).getTime();
-        }
-        if (filterConfig.tags !== undefined && filterConfig.tags.length !== 0) {
-          result = result && filterConfig.tags.every(currentTag => currentArticle.tags.indexOf(currentTag) >= 0);
-        }
-      }
-      return result;
-    }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(skip, skip + top);
-  }
+        return !(article.tags && !article.tags.every(tag => tags.indexOf(tag) >= 0 && typeof (tag) === 'string'));
+    }
 
-  function getArticle(findId) {
-    return articles.find(currentArticle => currentArticle.id === findId);
-  }
-
-  function validateArticle(article) {
-    if (article !== undefined) {
-      if (article.title !== undefined && (article.title.length > 100 || article.title.length === 0)) {
-        return false;
-      } else if (article.tags !== undefined && (article.tags.length === 0 || article.tags.length > 5)) {
-        return false;
-      } else if (article.summary !== undefined && (article.summary.length === 0 || article.summary.length > 200)) {
-        return false;
-      } else if (article.tags !== undefined && article.tags.length > 0 && !article.tags.every((currentTag) => {
-        if (tags.indexOf(currentTag) >= 0 && currentTag.length < 20) {
-          return true;
+    function removeArticle(removeId) {
+        const removeIndex = articles.findIndex(element => element.id === removeId);
+        resetArticles();
+        if (removeIndex !== -1) {
+            articles.splice(removeIndex, 1);
+            localStorage.setItem('articles', JSON.stringify(articles));
+            return true;
         }
         return false;
-      })) {
-        return false;
-      }
-      return true;
     }
-    return false;
-  }
 
-  function editArticle(editId, newArticle) {
-    console.log(newArticle);
-    console.log(editId);
-    if (!validateArticle(newArticle) || editId === -1) {
-      return false;
+    function numberOfArticles() {
+        return articles.length;
     }
-    articles[editId].title = newArticle.title;
-    articles[editId].summary = newArticle.summary;
-    articles[editId].tags = newArticle.tags;
-    articles[editId].content = newArticle.content;
-    localStorage.setItem('articles', JSON.stringify(articles));
-    return true;
-  }
 
-  function addArticle(newArticle) {
-    const previousSize = articles.length;
-    if (!validateArticle(newArticle)) {
-      return false;
-    } else if (previousSize !== articles.push(newArticle)) {
-      localStorage.setItem('articles', JSON.stringify(articles));
-      return true;
+    function resetArticles() {
+        ARTICLES_INDEX_FROM = 0;
+        ARTICLES_INDEX_TO = 10;
+        sessionStorage.removeItem('filters');
     }
-    return false;
-  }
 
-  function removeArticle(removeId) {
-    const removeIndex = articles.indexOf(getArticle(removeId));
-    if (removeIndex !== -1) {
-      articles.splice(removeIndex, 1);
-      localStorage.setItem('articles', JSON.stringify(articles));
-      return true;
+    function setArticles(articlesInit) {
+        articles = articlesInit;
     }
-    return false;
-  }
 
-  function addTag(newTag) {
-    const previousSize = tags.length;
-    if (newTag !== undefined) {
-      if (previousSize === tags.push(newTag)) {
-        localStorage.setItem('tags', JSON.stringify(tags));
-        return true;
-      }
-      return false;
+    function setTags(tagsInit) {
+        tags = tagsInit;
     }
-    return false;
-  }
 
-  function removeTag(removeTag) {
-    const removeIndex = tags.indexOf(removeTag);
-    if (removeIndex !== -1) {
-      tags.splice(removeIndex, 1);
-      localStorage.setItem('tags', JSON.stringify(tags));
-      return true;
+    function getTags() {
+        return tags;
     }
-    return false;
-  }
 
-  function getArticlesLength() {
-    return articles.length;
-  }
-
-  function getTagsLength() {
-    return tags.length;
-  }
-
-  function hideArticle(id) {
-    const xhr = new XMLHttpRequest();
-    let article;
-    xhr.open('DELETE', '/article');
-    xhr.setRequestHeader('content-type', 'application/json');
-    xhr.send(JSON.stringify({
-      id,
-    }));
-    article = getArticle(id);
-    if (article !== undefined) {
-      article.isHidden = true;
-    }
-  }
-
-  function sendNewArticle(article) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/article');
-    xhr.setRequestHeader('content-type', 'application/json');
-    xhr.send(JSON.stringify(article));
-  }
-
-  function sendChangedArticle(article) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('PUT', '/article');
-    xhr.setRequestHeader('content-type', 'application/json');
-    xhr.send(JSON.stringify(article));
-  }
-
-  return {
-    getArticlesLength,
-    getTagsLength,
-    getArticles,
-    getArticle,
-    validateArticle,
-    addArticle,
-    removeArticle,
-    editArticle,
-    addTag,
-    removeTag,
-  };
-}()
-);
-
-const articlesRenderer = (function () {
-  let USER_NAME;
-  let HEADER_ACTIONS;
-  let ARTICLE_TEMPLATE;
-  let ARTICLE_LIST;
-  let TAG_TEMPLATE;
-  let TAG_LIST;
-
-  function init() {
-    USER_NAME = document.querySelector('.user-name');
-    HEADER_ACTIONS = document.querySelector('.header-actions');
-    ARTICLE_TEMPLATE = document.querySelector('#template-article');
-    ARTICLE_LIST = document.querySelector('.article-list');
-    TAG_TEMPLATE = document.querySelector('#template-tag');
-    TAG_LIST = ARTICLE_TEMPLATE.content.querySelector('.tag-list');
-  }
-
-  function insertArticlesInDOM(articles) {
-    renderArticles(articles).forEach((article) => {
-      ARTICLE_LIST.appendChild(article);
-    });
-  }
-
-  function insertNewsInDOM(article) {
-    ARTICLE_LIST.appendChild(renderNews(article));
-  }
-
-  function renderArticles(articles) {
-    return articles.map((article) => {
-      renderArticleTemplate(article);
-      return renderArticle(article);
-    });
-  }
-
-  function renderNews(article) {
-    renderNewsTemplate(article);
-    return renderArticle(article);
-  }
-
-  function renderArticleTemplate(article) {
-    ARTICLE_TEMPLATE.content.querySelector('.article').dataset.id = article.id;
-    ARTICLE_TEMPLATE.content.querySelector('.title').textContent = article.title;
-    ARTICLE_TEMPLATE.content.querySelector('.author').textContent = article.author;
-    ARTICLE_TEMPLATE.content.querySelector('.date').textContent = dateToString(article.createdAt);
-    ARTICLE_TEMPLATE.content.querySelector('.text').textContent = article.summary;
-    TAG_LIST.innerHTML = '';
-    article.tags.forEach((tag) => {
-      TAG_TEMPLATE.content.querySelector('.tag').textContent = tag;
-      TAG_LIST.appendChild(TAG_TEMPLATE.content.querySelector('.tag').cloneNode(true));
-    });
-  }
-
-  function renderNewsTemplate(article) {
-    ARTICLE_TEMPLATE.content.querySelector('.article').dataset.id = article.id;
-    ARTICLE_TEMPLATE.content.querySelector('.title').textContent = article.title;
-    ARTICLE_TEMPLATE.content.querySelector('.author').textContent = article.author;
-    ARTICLE_TEMPLATE.content.querySelector('.date').textContent = dateToString(article.createdAt);
-    ARTICLE_TEMPLATE.content.querySelector('.text').textContent = article.content;
-    TAG_LIST.innerHTML = '';
-    article.tags.forEach((tag) => {
-      TAG_TEMPLATE.content.querySelector('.tag').textContent = tag;
-      TAG_LIST.appendChild(TAG_TEMPLATE.content.querySelector('.tag').cloneNode(true));
-    });
-  }
-
-  function renderArticle(article) {
-    const ARTICLE_ACTIONS = ARTICLE_TEMPLATE.content.querySelector('.article-actions');
-    const VIEW_BUTTON = document.querySelector('#template-view-button');
-    const EDIT_BUTTON = document.querySelector('#template-edit-button');
-    const DELETE_BUTTON = document.querySelector('#template-delete-button');
-    ARTICLE_ACTIONS.innerHTML = '';
-    ARTICLE_ACTIONS.appendChild(VIEW_BUTTON.content.querySelector('.view-button').cloneNode(true));
-    if (user !== null) {
-      ARTICLE_ACTIONS.appendChild(EDIT_BUTTON.content.querySelector('.edit-button').cloneNode(true));
-      ARTICLE_ACTIONS.appendChild(DELETE_BUTTON.content.querySelector('.delete-button').cloneNode(true));
-    }
-    return ARTICLE_TEMPLATE.content.querySelector('.article').cloneNode(true);
-  }
-
-  function renderHeaderAddButton() {
-    const ADD_ARTICLE_TEMPLATE = document.querySelector('#template-add-article');
-    const ADD_ARTICLE_HOLDER = document.querySelector('.add-article-holder');
-    if (user !== null) {
-      ADD_ARTICLE_HOLDER.appendChild(ADD_ARTICLE_TEMPLATE.content.querySelector('.add-article-button').cloneNode(true));
-      USER_NAME.textContent = user;
-      HEADER_ACTIONS.querySelector('.login-logout-button').textContent = 'Выйти';
-    } else {
-      USER_NAME.textContent = 'Гость';
-      HEADER_ACTIONS.querySelector('.login-logout-button').textContent = 'Войти';
-    }
-  }
-
-  function dateToString(date) {
-    let resultString = `${date.getDate()}.`;
-    if ((date.getMonth() + 1) < 10) {
-      resultString = `${resultString}0${date.getMonth() + 1}`;
-    } else {
-      resultString += (date.getMonth() + 1);
-    }
-    resultString = `${resultString}.${date.getFullYear()} `;
-    if (date.getHours() < 10) {
-      resultString = `${resultString}0${date.getHours()}`;
-    } else {
-      resultString += date.getHours();
-    }
-    if (date.getMinutes() < 10) {
-      resultString = `${resultString}:0${date.getMinutes()}`;
-    } else {
-      resultString = `${resultString}:${date.getMinutes()}`;
-    }
-    return resultString;
-  }
-
-  function removeArticlesFromDom() {
-    ARTICLE_LIST.innerHTML = '';
-  }
-
-  return {
-    dateToString,
-    insertArticlesInDOM,
-    removeArticlesFromDom,
-    renderHeaderAddButton,
-    init,
-    insertNewsInDOM,
-  };
+    return {
+        getArticles,
+        getArticle,
+        validateArticle,
+        removeArticle,
+        numberOfArticles,
+        resetArticles,
+        setArticles,
+        setTags,
+        getTags,
+    };
 }());
 
-document.addEventListener('FeedLoader', startApp());
+const articlesLogic = (function () {
+    const USER_NAME = document.querySelector('.user');
+    const HEADER_ACTIONS = document.querySelector('.header-actions');
+    const DYNAMIC_BLOCK = document.querySelector('.dynamic-block');
+    const ARTICLE_LIST_TEMPLATE = document.querySelector('#template-article-list');
+    const ARTICLE_TEMPLATE = document.querySelector('#template-article');
+    const TAG_TEMPLATE = document.querySelector('#template-tag');
+    const TAG_LIST = ARTICLE_TEMPLATE.content.querySelector('.tag-list');
+    const FILTERS_TEMPLATE = document.querySelector('#template-filters');
+    const PAGINATOR_TEMPLATE = document.querySelector('#template-paginator');
+    const NEXT_BUTTON_TEMPLATE = document.querySelector('#template-pagination-next-button');
+    const PREV_BUTTON_TEMPLATE = document.querySelector('#template-pagination-prev-button');
+    let ARTICLE_LIST;
+    let PAGINATOR;
+    let tags;
+    let authors;
 
-function startApp() {
-  articlesRenderer.init();
-  articlesRenderer.renderHeaderAddButton();
-  renderArticles();
-  renderPaginator();
-}
+    function loadArticles(articles) {
+        headerConfig();
+        document.querySelector('.feed').textContent = 'Лента новостей';
+        DYNAMIC_BLOCK.appendChild(ARTICLE_LIST_TEMPLATE.content.querySelector('.article-list').cloneNode(true));
+        ARTICLE_LIST = document.querySelector('.article-list');
+        createArticles(articles).forEach((article) => {
+            ARTICLE_LIST.appendChild(article);
+        });
+        httpRequests.httpGet('/authors').then(value => {
+            authors = JSON.parse(value);
+            DYNAMIC_BLOCK.appendChild(appendFilters());
+            DYNAMIC_BLOCK.appendChild(PAGINATOR_TEMPLATE.content.querySelector('.paginator').cloneNode(true));
+            PAGINATOR = document.querySelector('.paginator');
+            if (articlesService.numberOfArticles() > ARTICLES_INDEX_TO) {
+                PAGINATOR.appendChild(NEXT_BUTTON_TEMPLATE.content.querySelector('.pagination-next-button').cloneNode(true));
+            }
+            if (ARTICLES_INDEX_FROM > 0) {
+                PAGINATOR.appendChild(PREV_BUTTON_TEMPLATE.content.querySelector('.pagination-prev-button').cloneNode(true));
+            }
 
-function renderPaginator() {
-  const paginator = document.querySelector('#template-paginator');
-  const paginatorHolder = document.querySelector('.paginator-holder');
-  paginatorHolder.appendChild(paginator.content.querySelector('.paginator').cloneNode(true));
-}
-function removePaginator() {
-  document.querySelector('.paginator-holder').innerHTML = '';
-}
-function renderMainPageButton() {
-  const mainPageButton = document.querySelector('#template-main-page-button');
-  const mainPageButtonHolder = document.querySelector('.main-page-button-holder');
-  mainPageButtonHolder.appendChild(mainPageButton.content.querySelector('.main-page').cloneNode(true));
-}
-function removeMainPageButton() {
-  document.querySelector('.main-page-button-holder').innerHTML = '';
-}
+            PAGINATOR.addEventListener('click', handlePaginatorClick);
+            document.querySelectorAll('.view-button').forEach((button) => {
+                button.addEventListener('click', handleArticleViewButtonClick);
+            });
+            document.querySelectorAll('.edit-button').forEach((button) => {
+                button.addEventListener('click', handleArticleEditButtonClick);
+            });
+            document.querySelectorAll('.delete-button').forEach((button) => {
+                button.addEventListener('click', handleArticleDeleteButtonClick);
+            });
+            document.querySelector('.add-tag-filter').addEventListener('click', handleTagAddFilterButtonClick);
+            document.querySelector('.confirm-filter').addEventListener('click', handleConfirmFilterButtonClick);
+            document.querySelector('.reset-filter').addEventListener('click', handleResetFilterButtonClick);
+            document.querySelectorAll('.chosen-tag').forEach((tag) => {
+                tag.addEventListener('click', handleChosenTagClick);
+            });
+        }).catch(error => {
+            errorForm.loadError('Ошибка загрузки с сервера.');
+        });
+    }
 
-function renderArticles(from, to) {
-  articlesRenderer.removeArticlesFromDom();
-  articlesRenderer.insertArticlesInDOM(articlesModel.getArticles());
-}
+    function createArticles(articles) {
+        return articles.map(article => createArticle(article));
+    }
 
-function addArticle(article) {
-  articlesModel.addArticle(article);
-  renderArticles();
-}
+    function createArticle(article) {
+        const ARTICLE_ACTIONS = ARTICLE_TEMPLATE.content.querySelector('.article-actions');
+        const VIEW_BUTTON_TEMPLATE = document.querySelector('#template-view-button');
+        const EDIT_BUTTON_TEMPLATE = document.querySelector('#template-edit-button');
+        const DELETE_BUTTON_TEMPLATE = document.querySelector('#template-delete-button');
+        TAG_LIST.innerHTML = '';
+        ARTICLE_ACTIONS.innerHTML = '';
+        ARTICLE_TEMPLATE.content.querySelector('.article').dataset.id = article.id;
+        ARTICLE_TEMPLATE.content.querySelector('.title').textContent = article.title;
+        ARTICLE_TEMPLATE.content.querySelector('.author').textContent = article.author;
+        ARTICLE_TEMPLATE.content.querySelector('.date').textContent = dateToString(article.createdAt);
+        ARTICLE_TEMPLATE.content.querySelector('.summary').textContent = article.summary;
+        ARTICLE_TEMPLATE.content.querySelector('.content-block').innerHTML = '';
+        article.tags.forEach((tag) => {
+            TAG_TEMPLATE.content.querySelector('.tag').textContent = tag;
+            TAG_LIST.appendChild(TAG_TEMPLATE.content.querySelector('.tag-holder').cloneNode(true));
+        });
+        if (user) {
+            ARTICLE_ACTIONS.appendChild(EDIT_BUTTON_TEMPLATE.content.querySelector('.edit-button').cloneNode(true));
+        }
+        ARTICLE_ACTIONS.appendChild(VIEW_BUTTON_TEMPLATE.content.querySelector('.view-button').cloneNode(true));
+        if (user) {
+            ARTICLE_ACTIONS.appendChild(DELETE_BUTTON_TEMPLATE.content.querySelector('.delete-button').cloneNode(true));
+        }
+        return ARTICLE_TEMPLATE.content.querySelector('.article').cloneNode(true);
+    }
 
-function removeArticle(id) {
-  articlesModel.removeArticle(id);
-  renderArticles();
-}
+    function dateToString(date) {
+        return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()} ${date.getHours()}:${
+            date.getMinutes()}`;
+    }
 
-function editArticle(id, article) {
-  articlesModel.editArticle(id, article);
-}
+    function dateInputToString(date) {
+        return `${date.getFullYear()}-${(date.getMonth() + 1 > 9) ? date.getMonth() + 1 : `0${date.getMonth() + 1}`
+            }-${(date.getDate() > 9) ? date.getDate() : `0${date.getDate()}`}`;
+    }
 
-const viewButton = document.querySelectorAll('.view-button');
-function handleViewButtonClick(event) {
-  const newsId = event.target.parentElement.parentElement.dataset.id;
-  const filter = document.querySelector('.filters');
-  filter.style.display = 'none';
-  removePaginator();
-  renderMainPageButton();
-  articlesRenderer.removeArticlesFromDom();
-  articlesRenderer.insertNewsInDOM(articlesModel.getArticle(newsId));
-}
-[].forEach.call(viewButton, (btn) => {
-  btn.addEventListener('click', handleViewButtonClick);
-});
+    function appendFilters() {
+        const CHOSEN_TAG_TEMPLATE = document.querySelector('#template-chosen-tag');
+        const CHOSEN_TAGS_LIST = FILTERS_TEMPLATE.content.querySelector('.chosen-tags-list');
+        const AUTHORS_DATALIST = FILTERS_TEMPLATE.content.querySelector('#authors');
+        const TAGS_DATALIST = FILTERS_TEMPLATE.content.querySelector('#tags');
+        const OPTION_TEMPLATE = document.querySelector('#template-option');
+        const filters = JSON.parse(sessionStorage.getItem('filters'), (key, value) => {
+            if (key === 'dateFrom' || key === 'dateTo') {
+                return new Date(value);
+            }
+            return value;
+        });
+        tags = articlesService.getTags();
+        CHOSEN_TAGS_LIST.innerHTML = '';
+        AUTHORS_DATALIST.innerHTML = '';
+        TAGS_DATALIST.innerHTML = '';
+        if (filters) {
+            FILTERS_TEMPLATE.content.querySelector('.author-input').value = (filters.author) ? filters.author : '';
+            FILTERS_TEMPLATE.content.querySelector('.date-from').value = (filters.dateFrom) ? dateInputToString(filters.dateFrom) : '';
+            FILTERS_TEMPLATE.content.querySelector('.date-to').value = (filters.dateTo) ? dateInputToString(filters.dateTo) : '';
+            FILTERS_TEMPLATE.content.querySelector('.tags-input').value = '';
+            if (filters.tags) {
+                filters.tags.forEach((tag) => {
+                    CHOSEN_TAG_TEMPLATE.content.querySelector('.chosen-tag').textContent = tag;
+                    CHOSEN_TAGS_LIST.appendChild(CHOSEN_TAG_TEMPLATE.content.querySelector('.tag-holder').cloneNode(true));
+                });
+            }
+        } else {
+            FILTERS_TEMPLATE.content.querySelector('.author-input').value = '';
+            FILTERS_TEMPLATE.content.querySelector('.date-from').value = '';
+            FILTERS_TEMPLATE.content.querySelector('.date-to').value = '';
+            FILTERS_TEMPLATE.content.querySelector('.tags-input').value = '';
+        }
+        if (authors) {
+            authors.forEach((author) => {
+                OPTION_TEMPLATE.content.querySelector('.option').value = author;
+                AUTHORS_DATALIST.appendChild(OPTION_TEMPLATE.content.querySelector('.option').cloneNode(true));
+            });
+        }
+        if (tags) {
+            tags.forEach((tag) => {
+                OPTION_TEMPLATE.content.querySelector('.option').value = tag;
+                TAGS_DATALIST.appendChild(OPTION_TEMPLATE.content.querySelector('.option').cloneNode(true));
+            });
+        }
+        return FILTERS_TEMPLATE.content.querySelector('.filters').cloneNode(true);
+    }
 
-const loginLogoutButton = document.querySelectorAll('.login-logout-button');
-function handleLoginLogoutButton() {
-  if (user !== null) {
-    user = null;
-    articlesRenderer.renderHeaderAddButton();
-    renderArticles();
-  } else {
-    const filter = document.querySelector('.filters');
-    filter.style.display = 'none';
-    articlesRenderer.removeArticlesFromDom();
-    removePaginator();
-    const LOGIN_TEMPLATE = document.querySelector('#template-login');
-    const LOGIN_HOLDER = document.querySelector('.login-holder');
-    LOGIN_HOLDER.appendChild(LOGIN_TEMPLATE.content.querySelector('.login-page-fields').cloneNode(true));
-    renderMainPageButton();
-    const authButton = document.querySelectorAll('.login-button');
-    [].forEach.call(authButton, (btn) => {
-      btn.addEventListener('click', handleAuthButton);
+    function headerConfig() {
+        const ADD_ARTICLE_TEMPLATE = document.querySelector('#template-add-article');
+        const ADD_ARTICLE_HOLDER = HEADER_ACTIONS.querySelector('.add-article-holder');
+        const LOGIN_LOGOUT_BUTTON = HEADER_ACTIONS.querySelector('.login-logout-button');
+
+        if (!user) {
+            USER_NAME.textContent = 'Гость';
+            LOGIN_LOGOUT_BUTTON.textContent = 'Войти';
+        } else {
+            //ADD_ARTICLE_HOLDER.innerHTML = '';
+            ADD_ARTICLE_HOLDER.appendChild(ADD_ARTICLE_TEMPLATE.content.querySelector('.add-article').cloneNode(true));
+            USER_NAME.textContent = user;
+            LOGIN_LOGOUT_BUTTON.textContent = 'Выйти';
+            ADD_ARTICLE_HOLDER.addEventListener('click', handleAddArticleClick);
+        }
+    }
+
+    function handleConfirmFilterButtonClick() {
+        const filters = JSON.parse(sessionStorage.getItem('filters'), (key, value) => {
+                if (key === 'dateFrom' || key === 'dateTo') {
+                    return new Date(value);
+                }
+                return value;
+            }) || {};
+        let buf;
+        filters.author = document.forms.filters.elements.authorInput.value;
+        buf = document.forms.filters.elements.dateFrom.value;
+        filters.dateFrom = (buf !== '') ? new Date(buf) : undefined;
+        buf = document.forms.filters.elements.dateTo.value;
+        filters.dateTo = (buf !== '') ? new Date(buf) : undefined;
+        sessionStorage.setItem('filters', JSON.stringify(filters));
+        ARTICLES_INDEX_FROM = 0;
+        ARTICLES_INDEX_TO = 10;
+        appendArticles(ARTICLES_INDEX_FROM, ARTICLES_INDEX_TO);
+    }
+
+    function handleTagAddFilterButtonClick() {
+        const CHOSEN_TAGS_LIST = document.querySelector('.chosen-tags-list');
+        const CHOSEN_TAG_TEMPLATE = document.querySelector('#template-chosen-tag');
+        const filters = JSON.parse(sessionStorage.getItem('filters'), (key, value) => {
+                if (key === 'dateFrom' || key === 'dateTo') {
+                    return new Date(value);
+                }
+                return value;
+            }) || {};
+        let tag;
+        filters.tags = filters.tags || [];
+        tag = document.forms.filters.elements.tagsInput.value;
+        if (filters.tags.length < 5 && tags.indexOf(tag) !== -1 && filters.tags.indexOf(tag) === -1) {
+            filters.tags.push(tag);
+            sessionStorage.setItem('filters', JSON.stringify(filters));
+            document.forms.filters.elements.tagsInput.value = '';
+            CHOSEN_TAGS_LIST.innerHTML = '';
+            filters.tags.forEach((tagCur) => {
+                CHOSEN_TAG_TEMPLATE.content.querySelector('.chosen-tag').textContent = tagCur;
+                CHOSEN_TAGS_LIST.appendChild(CHOSEN_TAG_TEMPLATE.content.querySelector('.tag-holder').cloneNode(true));
+            });
+            document.querySelectorAll('.chosen-tag').forEach((tagCur) => {
+                tag.addEventListener('click', handleChosenTagClick);
+            });
+        } else {
+            alert('Невозможно добавить тег!');
+        }
+    }
+
+    function handleChosenTagClick(event) {
+        const CHOSEN_TAGS_LIST = document.querySelector('.chosen-tags-list');
+        const CHOSEN_TAG_TEMPLATE = document.querySelector('#template-chosen-tag');
+        const filters = JSON.parse(sessionStorage.getItem('filters'), (key, value) => {
+            if (key === 'dateFrom' || key === 'dateTo') {
+                return new Date(value);
+            }
+            return value;
+        });
+        filters.tags.splice(filters.tags.indexOf(event.target.textContent), 1);
+        sessionStorage.setItem('filters', JSON.stringify(filters));
+        CHOSEN_TAGS_LIST.innerHTML = '';
+        if (filters.tags.length > 0) {
+            filters.tags.forEach((tag) => {
+                CHOSEN_TAG_TEMPLATE.content.querySelector('.chosen-tag').textContent = tag;
+                CHOSEN_TAGS_LIST.appendChild(CHOSEN_TAG_TEMPLATE.content.querySelector('.tag-holder').cloneNode(true));
+            });
+            document.querySelectorAll('.chosen-tag').forEach((tag) => {
+                tag.addEventListener('click', handleChosenTagClick);
+            });
+        }
+    }
+
+    function handleResetFilterButtonClick() {
+        ARTICLES_INDEX_FROM = 0;
+        ARTICLES_INDEX_TO = 10;
+        sessionStorage.removeItem('filters');
+        articlesService.resetArticles();
+        appendArticles(ARTICLES_INDEX_FROM, ARTICLES_INDEX_TO);
+    }
+
+    return {
+        appendArticles: loadArticles,
+        headerConfig,
+    };
+}());
+
+const articleView = (function () {
+    const DYNAMIC_BLOCK = document.querySelector('.dynamic-block');
+    const ARTICLE_TEMPLATE = document.querySelector('#template-article');
+    const TAG_TEMPLATE = document.querySelector('#template-tag');
+    const TAG_LIST = ARTICLE_TEMPLATE.content.querySelector('.tag-list');
+    const RETURN_BUTTON_TEMPLATE = document.querySelector('#template-return-button');
+
+    function loadArticle(id) {
+        let article;
+        DYNAMIC_BLOCK.innerHTML = '';
+        document.querySelector('.feed').textContent = 'Просмотр новости';
+        DYNAMIC_BLOCK.appendChild(RETURN_BUTTON_TEMPLATE.content.querySelector('.return-button-block').cloneNode(true));
+        article = createArticle(id);
+        article.className = 'article-view';
+        DYNAMIC_BLOCK.appendChild(article);
+        document.querySelector('.return-button-block').addEventListener('click', handleReturnButtonClick);
+        if (user) {
+            document.querySelector('.edit-button').addEventListener('click', handleArticleEditButtonClick);
+            document.querySelector('.delete-button').addEventListener('click', handleArticleDeleteButtonClick);
+        }
+    }
+
+    function createArticle(id) {
+        const ARTICLE_ACTIONS = ARTICLE_TEMPLATE.content.querySelector('.article-actions');
+        const ARTICLE_CONTENT_BLOCK = ARTICLE_TEMPLATE.content.querySelector('.content-block');
+        const EDIT_BUTTON_TEMPLATE = document.querySelector('#template-edit-button');
+        const DELETE_BUTTON_TEMPLATE = document.querySelector('#template-delete-button');
+        const ARTICLE_CONTENT_TEMPLATE = document.querySelector('#template-content');
+        const article = articlesService.getArticle(id);
+        TAG_LIST.innerHTML = '';
+        ARTICLE_ACTIONS.innerHTML = '';
+        ARTICLE_CONTENT_BLOCK.innerHTML = '';
+        ARTICLE_TEMPLATE.content.querySelector('.article').dataset.id = article.id;
+        ARTICLE_TEMPLATE.content.querySelector('.title').textContent = article.title;
+        ARTICLE_TEMPLATE.content.querySelector('.author').textContent = article.author;
+        ARTICLE_TEMPLATE.content.querySelector('.date').textContent = dateToString(article.createdAt);
+        ARTICLE_TEMPLATE.content.querySelector('.summary').textContent = '';
+        ARTICLE_CONTENT_TEMPLATE.content.querySelector('.content').textContent = article.content;
+        ARTICLE_CONTENT_BLOCK.appendChild(ARTICLE_CONTENT_TEMPLATE.content.querySelector('.content').cloneNode(true));
+        article.tags.forEach((tag) => {
+            TAG_TEMPLATE.content.querySelector('.tag').textContent = tag;
+            TAG_LIST.appendChild(TAG_TEMPLATE.content.querySelector('.tag-holder').cloneNode(true));
+        });
+        if (user) {
+            ARTICLE_ACTIONS.appendChild(EDIT_BUTTON_TEMPLATE.content.querySelector('.edit-button').cloneNode(true));
+            ARTICLE_ACTIONS.appendChild(DELETE_BUTTON_TEMPLATE.content.querySelector('.delete-button').cloneNode(true));
+        }
+        return ARTICLE_TEMPLATE.content.querySelector('.article').cloneNode(true);
+    }
+
+    function dateToString(date) {
+        return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()} ${date.getHours()}:${
+            date.getMinutes()}`;
+    }
+
+    return {
+        loadArticle,
+    };
+}());
+
+const authorizationForm = (function () {
+    const DYNAMIC_BLOCK = document.querySelector('.dynamic-block');
+    const RETURN_BUTTON_TEMPLATE = document.querySelector('#template-return-button');
+    const AUTHORIZATION_INPUT_TEMPLATE = document.querySelector('#template-authorization-input-block');
+    const LOGIN_BUTTON_TEMPLATE = document.querySelector('#template-login-button');
+
+    function loadForm() {
+        DYNAMIC_BLOCK.innerHTML = '';
+        document.querySelector('.feed').textContent = 'Авторизация';
+        DYNAMIC_BLOCK.appendChild(RETURN_BUTTON_TEMPLATE.content.querySelector('.return-button-block').cloneNode(true));
+        document.querySelector('.return-button-block').addEventListener('click', handleReturnButtonClick);
+        DYNAMIC_BLOCK.appendChild(AUTHORIZATION_INPUT_TEMPLATE.content.querySelector('.authorization-input-block').cloneNode(true));
+        DYNAMIC_BLOCK.appendChild(LOGIN_BUTTON_TEMPLATE.content.querySelector('.login-button-block').cloneNode(true));
+        document.querySelector('.login-button-block').addEventListener('click', handleLoginButtonClick);
+    }
+
+    function handleLoginButtonClick() {
+        httpRequests.httpPost('/login', JSON.stringify({
+            username: document.forms[0].elements[0].value,
+            password: document.forms[0].elements[1].value,
+        })).then(value => {
+            user = JSON.parse(value);
+            if (user) {
+                sessionStorage.setItem('user', value);
+                appendArticles(ARTICLES_INDEX_FROM, ARTICLES_INDEX_TO);
+            } else {
+                alert('Неверный логин или пароль.');
+            }
+        }).catch(error => {
+            errorForm.loadError('Ошибка загрузки с сервера.');
+        });
+    }
+
+    return {
+        loadForm,
+    };
+}());
+
+const editForm = (function () {
+    const DYNAMIC_BLOCK = document.querySelector('.dynamic-block');
+    const EDIT_FORM_TEMPLATE = document.querySelector('#template-edit-form');
+    const RETURN_BUTTON_TEMPLATE = document.querySelector('#template-return-button');
+    let article = {};
+    let articlesLength;
+    let tags;
+
+    function loadEditForm(id) {
+        DYNAMIC_BLOCK.innerHTML = '';
+        DYNAMIC_BLOCK.appendChild(RETURN_BUTTON_TEMPLATE.content.querySelector('.return-button-block').cloneNode(true));
+        Promise.all([httpRequests.httpGet('/length'), httpRequests.httpGet('/tags')]).then(value => {
+            tags = JSON.parse(value[1]);
+            if (id) {
+                document.querySelector('.feed').textContent = 'Редактирование новости';
+                DYNAMIC_BLOCK.appendChild(loadExistentArticle(id));
+            } else {
+                document.querySelector('.feed').textContent = 'Добавление новости';
+                articlesLength = JSON.parse(value[0]);
+                DYNAMIC_BLOCK.appendChild(loadNewArticle());
+            }
+            document.querySelector('.return-button-block').addEventListener('click', handleReturnButtonClick);
+            document.querySelector('.add-article-button-block').addEventListener('click', handleAddChangeArticleConfirmClick);
+            document.querySelector('.existent-tags-list').addEventListener('click', handleExistentTagClick);
+            document.querySelector('.add-tag-button').addEventListener('click', handleAddTagButtonClick);
+        }).catch(error => {
+            errorForm.loadError('Ошибка загрузки с сервера.');
+        });
+    }
+
+    function loadExistentArticle(id) {
+        article = articlesService.getArticle(id);
+        EDIT_FORM_TEMPLATE.content.querySelector('.id-edit').textContent = article.id;
+        EDIT_FORM_TEMPLATE.content.querySelector('.author-edit').textContent = article.author;
+        EDIT_FORM_TEMPLATE.content.querySelector('.date-edit').textContent = dateToString(article.createdAt);
+        EDIT_FORM_TEMPLATE.content.querySelector('#title-input').textContent = article.title;
+        EDIT_FORM_TEMPLATE.content.querySelector('#tag-input').textContent = '';
+        EDIT_FORM_TEMPLATE.content.querySelector('#summary-input').textContent = article.summary;
+        EDIT_FORM_TEMPLATE.content.querySelector('#content-input').textContent = article.content;
+        EDIT_FORM_TEMPLATE.content.querySelector('.add-article-button').textContent = 'Принять изменения';
+        loadExistentTags(EDIT_FORM_TEMPLATE.content);
+        return EDIT_FORM_TEMPLATE.content.querySelector('.edit-form').cloneNode(true);
+    }
+
+    function loadNewArticle() {
+        article.tags = [];
+        EDIT_FORM_TEMPLATE.content.querySelector('.id-edit').textContent = articlesLength + 1;
+        EDIT_FORM_TEMPLATE.content.querySelector('.author-edit').textContent = user;
+        EDIT_FORM_TEMPLATE.content.querySelector('.date-edit').textContent = dateToString(new Date());
+        EDIT_FORM_TEMPLATE.content.querySelector('#title-input').textContent = '';
+        EDIT_FORM_TEMPLATE.content.querySelector('#tag-input').textContent = '';
+        EDIT_FORM_TEMPLATE.content.querySelector('#summary-input').textContent = '';
+        EDIT_FORM_TEMPLATE.content.querySelector('#content-input').textContent = '';
+        EDIT_FORM_TEMPLATE.content.querySelector('.add-article-button').textContent = 'Добавить новость в ленту';
+        loadExistentTags(EDIT_FORM_TEMPLATE.content);
+        return EDIT_FORM_TEMPLATE.content.querySelector('.edit-form').cloneNode(true);
+    }
+
+    function loadExistentTags(existentTagsList) {
+        const EXISTENT_TAGS_LIST = existentTagsList.querySelector('.existent-tags-list');
+        const EXISTENT_TAG_TEMPLATE = document.querySelector('#template-existent-tag');
+        const CHOSEN_TAG_TEMPLATE = document.querySelector('#template-chosen-tag');
+        EXISTENT_TAGS_LIST.innerHTML = '';
+        tags.forEach((tag) => {
+            if (article.tags.indexOf(tag) !== -1) {
+                CHOSEN_TAG_TEMPLATE.content.querySelector('.chosen-tag').textContent = tag;
+                EXISTENT_TAGS_LIST.appendChild(CHOSEN_TAG_TEMPLATE.content.querySelector('.tag-holder').cloneNode(true));
+            } else {
+                EXISTENT_TAG_TEMPLATE.content.querySelector('.tag').textContent = tag;
+                EXISTENT_TAGS_LIST.appendChild(EXISTENT_TAG_TEMPLATE.content.querySelector('.tag-holder').cloneNode(true));
+            }
+        });
+    }
+
+    function handleAddChangeArticleConfirmClick() {
+        article.id = document.querySelector('.id-edit').textContent;
+        article.author = document.querySelector('.author-edit').textContent;
+        article.createdAt = article.createdAt || new Date();
+        article.title = document.querySelector('#title-input').value;
+        article.summary = document.querySelector('#summary-input').value;
+        article.content = document.querySelector('#content-input').value;
+        if (articlesService.validateArticle(article)) {
+            if (articlesService.getArticle(article.id)) {
+                httpRequests.httpPut('/article', JSON.stringify(article)).then(() => {
+                    articlesService.resetArticles();
+                    appendArticles(ARTICLES_INDEX_FROM, ARTICLES_INDEX_TO);
+                }).catch(error => {
+                    errorForm.loadError('Ошибка загрузки с сервера.');
+                });
+            } else {
+                httpRequests.httpPost('/article', JSON.stringify(article)).then(() => {
+                    articlesService.resetArticles();
+                    appendArticles(ARTICLES_INDEX_FROM, ARTICLES_INDEX_TO);
+                }).catch(error => {
+                    errorForm.loadError('Ошибка загрузки с сервера.');
+                });
+            }
+        } else {
+            alert('Некорректная новость!');
+        }
+    }
+
+    function handleExistentTagClick(event) {
+        if (event.target.classList.contains('tag')) {
+            if (article.tags.length < 5) {
+                article.tags.push(event.target.textContent);
+                event.target.classList.remove('tag');
+                event.target.classList.add('chosen-tag');
+            } else {
+                alert('Невозможно добавить тег!');
+            }
+        } else if (event.target.classList.contains('chosen-tag')) {
+            article.tags.splice(article.tags.indexOf(event.target.textContent), 1);
+            event.target.classList.remove('chosen-tag');
+            event.target.classList.add('tag');
+        }
+    }
+
+    function handleAddTagButtonClick() {
+        let newTag;
+        if (document.querySelector('#tag-input').value.trim() !== '' && tags.indexOf(document.querySelector('#tag-input').value) === -1) {
+            newTag = document.querySelector('#tag-input').value;
+            document.querySelector('#tag-input').value = '';
+            Promise.all([httpRequests.httpPost('/tag', JSON.stringify({ newTag })), httpRequests.httpGet('/tags')]).then(value => {
+                tags = JSON.parse(value[1]);
+                articlesService.setTags(tags);
+                loadExistentTags(document);
+            }).catch(error => {
+                errorForm.loadError('Ошибка загрузки с сервера.');
+            });
+        } else if (tags.indexOf(document.querySelector('#tag-input').value) !== -1) {
+            alert('Данный тег уже существует.');
+        }
+    }
+
+    function dateToString(date) {
+        return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()} ${date.getHours()}:${
+            date.getMinutes()}`;
+    }
+
+    return {
+        loadEditForm,
+    };
+}());
+
+const errorForm = (function () {
+    const DYNAMIC_BLOCK = document.querySelector('.dynamic-block');
+    const RETURN_BUTTON_TEMPLATE = document.querySelector('#template-return-button');
+    const ERROR_TEMPLATE = document.querySelector('#template-error');
+
+    function loadError(error) {
+        DYNAMIC_BLOCK.innerHTML = '';
+        document.querySelector('.feed').textContent = 'Ошибка';
+        DYNAMIC_BLOCK.appendChild(RETURN_BUTTON_TEMPLATE.content.querySelector('.return-button-block').cloneNode(true));
+        document.querySelector('.return-button-block').addEventListener('click', handleReturnButtonClick);
+        ERROR_TEMPLATE.content.querySelector('.error').textContent = 'Ошибка: ' + error;
+        DYNAMIC_BLOCK.appendChild(ERROR_TEMPLATE.content.querySelector('.error-block').cloneNode(true));
+    }
+
+    return {
+        loadError,
+    };
+}());
+
+function appendArticles(from, to) {
+    articlesLogic.headerConfig();
+    document.querySelector('.dynamic-block').innerHTML = '';
+    Promise.all([httpRequests.httpGet('/article'), httpRequests.httpGet('/tags')]).then(values => {
+        articlesService.setArticles(JSON.parse(values[0], (key, value) => {
+            if (key === 'createdAt') {
+                return new Date(value);
+            }
+            return value;
+        }));
+        articlesService.setTags(JSON.parse(values[1]));
+        articlesLogic.appendArticles(articlesService.getArticles(from, to, JSON.parse(sessionStorage.getItem('filters'), (key, value) => {
+            if (key === 'dateFrom' || key === 'dateTo') {
+                return new Date(value);
+            }
+            return value;
+        })));
+    }).catch(error => {
+        errorForm.loadError('Ошибка загрузки с сервера.');
     });
-  }
-}
-[].forEach.call(loginLogoutButton, (btn) => {
-  btn.addEventListener('click', handleLoginLogoutButton);
-});
-
-
-function handleAuthButton() {
-  const loginInput = document.getElementsByName('login-input')[0];
-  const passwordInput = document.getElementsByName('password-input')[0];
-  if (validateUser(loginInput.value, passwordInput.value) === true) {
-    user = loginInput.value;
-    const filter = document.querySelector('.filters');
-    document.querySelector('.login-holder').removeChild(document.querySelector('.login-page-fields'));
-    startApp();
-    filter.style.display = 'inline';
-    renderMainPageButton();
-  } else {
-    alert('Неверно введён логин или пароль');
-  }
-}
-function validateUser(login, password) {
-  return (login === '1' || (login === 'admin' && password === 'admin'));
 }
 
+function handleReturnButtonClick() {
+    appendArticles(ARTICLES_INDEX_FROM, ARTICLES_INDEX_TO);
+}
 
-const filterButton = document.querySelectorAll('.confirm-filter');
-function handleFilterButtonClick(event) {
-  let tempArticles;
-  switch (event.target.parentNode.className) {
-    case 'author-filter': {
-      const authorInput = document.getElementsByName('author-input')[0];
-      tempArticles = articlesModel.getArticles(0, 10, { author: authorInput.value.toString() });
-      break;
+function handleLoginLogoutClick(event) {
+    if (event.target.textContent === 'Выйти') {
+        sessionStorage.removeItem('user');
+        user = JSON.parse(sessionStorage.getItem('user'));
+        appendArticles(ARTICLES_INDEX_FROM, ARTICLES_INDEX_TO);
+    } else {
+        authorizationForm.loadForm();
     }
-    case 'date-filter': {
-      const dateFromInput = document.getElementsByName('date-from')[0];
-      const dateToInput = document.getElementsByName('date-to')[0];
-      tempArticles = articlesModel.getArticles(0, 10, {
-        dateFrom: new Date(dateFromInput.value),
-        dateTo: new Date(dateToInput.value),
-      });
-      break;
+}
+
+function handleAddArticleClick() {
+    editForm.loadEditForm();
+}
+
+function handlePaginatorClick(event) {
+    if (event.target.textContent.includes('Далее')) {
+        ARTICLES_INDEX_FROM += 10;
+        ARTICLES_INDEX_TO += 10;
     }
-    case 'tags-filter': {
-      const tagsInput = document.getElementsByName('tags-input')[0];
-      const tempTags = tagsInput.value.split(',');
-      tempTags.forEach((curTag) => {
-        curTag.trim();
-      });
-      tempArticles = articlesModel.getArticles(0, 10, articlesModel.getTagsLength(), { tags: [tempTags.toString()] });
-      break;
+    if (event.target.textContent.includes('Назад')) {
+        ARTICLES_INDEX_FROM -= 10;
+        ARTICLES_INDEX_TO -= 10;
     }
-    default: {
-      break;
-    }
-  }
-  if (tempArticles.length > 0) {
-    articlesRenderer.removeArticlesFromDom();
-    articlesRenderer.insertArticlesInDOM(tempArticles);
-  } else {
-    alert('Нет ни одного автора с таким ником');
-  }
-}
-[].forEach.call(filterButton, (btn) => {
-  btn.addEventListener('click', handleFilterButtonClick);
-});
-
-const resetButton = document.querySelectorAll('.reset-button');
-function handleResetButtonClick() {
-  const authorInput = document.getElementsByName('author-input')[0];
-  const tagsInput = document.getElementsByName('tags-input')[0];
-  authorInput.value = '';
-  tagsInput.value = '';
-  articlesRenderer.removeArticlesFromDom();
-  articlesRenderer.insertArticlesInDOM(articlesModel.getArticles());
-}
-[].forEach.call(resetButton, (btn) => {
-  btn.addEventListener('click', handleResetButtonClick);
-});
-
-
-let acceptButton;
-const editButton = document.querySelectorAll('.edit-button');
-function handleEditButtonClick(event) {
-  const EDIT_TEMPLATE = document.querySelector('#template-edit-article');
-  const EDIT_HOLDER = document.querySelector('.article-edit-holder');
-  articlesRenderer.removeArticlesFromDom();
-  const filter = document.querySelector('.filters');
-  renderMainPageButton();
-  removePaginator();
-  filter.style.display = 'none';
-  const tempArticle = articlesModel.getArticle(event.target.parentElement.parentElement.dataset.id);
-  EDIT_TEMPLATE.content.querySelector('.article').dataset.id = tempArticle.id;
-  EDIT_TEMPLATE.content.querySelector('.input-title').value = tempArticle.title;
-  EDIT_TEMPLATE.content.querySelector('.author').textContent = tempArticle.author;
-  EDIT_TEMPLATE.content.querySelector('.date').textContent =
-        articlesRenderer.dateToString(tempArticle.createdAt);
-  EDIT_TEMPLATE.content.querySelector('.input-summary').value = tempArticle.summary;
-  EDIT_TEMPLATE.content.querySelector('.input-content').value = tempArticle.content;
-  if (tempArticle.tags[0] !== undefined) {
-    EDIT_TEMPLATE.content.querySelector('.input-tag1').value = tempArticle.tags[0];
-  }
-  if (tempArticle.tags[1] !== undefined) {
-    EDIT_TEMPLATE.content.querySelector('.input-tag2').value = tempArticle.tags[1];
-  }
-  if (tempArticle.tags[2] !== undefined) {
-    EDIT_TEMPLATE.content.querySelector('.input-tag3').value = tempArticle.tags[2];
-  }
-  if (tempArticle.tags[3] !== undefined) {
-    EDIT_TEMPLATE.content.querySelector('.input-tag4').value = tempArticle.tags[3];
-  }
-  if (tempArticle.tags[4] !== undefined) {
-    EDIT_TEMPLATE.content.querySelector('.input-tag5').value = tempArticle.tags[4];
-  }
-  EDIT_TEMPLATE.content.querySelector('.accept-button').style.display = 'inline';
-  EDIT_HOLDER.appendChild(EDIT_TEMPLATE.content.querySelector('.article').cloneNode(true));
-  acceptButton = document.querySelector('.accept-button');
-  acceptButton.addEventListener('click', handleAcceptButtonClick);
-}
-[].forEach.call(editButton, (btn) => {
-  btn.addEventListener('click', handleEditButtonClick);
-});
-
-function handleAcceptButtonClick(event) {
-  let tag1;
-  let tag2;
-  let tag3;
-  let tag4;
-  let tag5;
-  let tags = [];
-  const articleId = event.target.parentElement.dataset.id;
-  const EDIT_TEMPLATE = document.querySelector('#template-edit-article');
-  const title = document.querySelector('.input-title').value;
-  const summary = document.querySelector('.input-summary').value;
-  const content = document.querySelector('.input-content').value;
-  if (document.querySelector('.input-tag1').value !== null) {
-    tag1 = document.querySelector('.input-tag1').value;
-    tags.push(tag1);
-  }
-  if (document.querySelector('.input-tag2').value !== null) {
-    tag2 = document.querySelector('.input-tag2').value;
-    tags.push(tag2);
-  }
-  if (document.querySelector('.input-tag3').value !== null) {
-    tag3 = document.querySelector('.input-tag3').value;
-    tags.push(tag3);
-  }
-  if (document.querySelector('.input-tag4').value !== null) {
-    tag4 = document.querySelector('.input-tag4').value;
-    tags.push(tag4);
-  }
-  if (document.querySelector('.input-tag5').value !== null) {
-    tag5 = document.querySelector('.input-tag5').value;
-    tags.push(tag5);
-  }
-  console.log(title, summary);
-  if (editArticle(articleId, {
-    title,
-    summary,
-    content,
-    tags,
-  }) === false) {
-    alert('Введённая статья не является валидной');
-  }
-  document.querySelector('.article-edit-holder').removeChild(document.querySelector('.article'));
-  document.querySelector('.main-page-button-holder').removeChild(document.querySelector('.main-page'));
-  renderArticles();
-  document.querySelector('.filters').style.display = 'inline';
-  renderPaginator();
+    appendArticles(ARTICLES_INDEX_FROM, ARTICLES_INDEX_TO);
 }
 
-const addButton = document.querySelectorAll('.add-article-button');
-
-function handleAddButtonClick() {
-  const EDIT_TEMPLATE = document.querySelector('#template-edit-article');
-  const EDIT_HOLDER = document.querySelector('.article-edit-holder');
-  articlesRenderer.removeArticlesFromDom();
-  const filter = document.querySelector('.filters');
-  renderMainPageButton();
-  removePaginator();
-  filter.style.display = 'none';
-  EDIT_TEMPLATE.content.querySelector('.article').dataset.id = '';
-  EDIT_TEMPLATE.content.querySelector('.input-title').value = '';
-  EDIT_TEMPLATE.content.querySelector('.author').textContent = '';
-  EDIT_TEMPLATE.content.querySelector('.date').textContent = '';
-  EDIT_TEMPLATE.content.querySelector('.input-summary').value = '';
-  EDIT_TEMPLATE.content.querySelector('.input-content').value = '';
-  EDIT_TEMPLATE.content.querySelector('.input-tag1').value = '';
-  EDIT_TEMPLATE.content.querySelector('.input-tag2').value = '';
-  EDIT_TEMPLATE.content.querySelector('.input-tag3').value = '';
-  EDIT_TEMPLATE.content.querySelector('.input-tag4').value = '';
-  EDIT_TEMPLATE.content.querySelector('.input-tag5').value = '';
-    /* EDIT_TEMPLATE.content.querySelector('.accept-button').style.display = 'inline';*/
-  EDIT_HOLDER.appendChild(EDIT_TEMPLATE.content.querySelector('.article').cloneNode(true));
-  const acceptAddButton = document.querySelector('.accept-add-button');
-  acceptAddButton.addEventListener('click', handleAcceptAddButtonClick);
-}
-[].forEach.call(addButton, (btn) => {
-  btn.addEventListener('click', handleAddButtonClick);
-});
-
-function handleAcceptAddButtonClick() {
-  const EDIT_TEMPLATE = document.querySelector('#template-create-article');
-  const title = EDIT_TEMPLATE.content.querySelector('.input-title').value;
-  const summary = EDIT_TEMPLATE.content.querySelector('.input-summary').value;
-  const content = EDIT_TEMPLATE.content.querySelector('.input-content').value;
-  const tags = [];
-  if (EDIT_TEMPLATE.content.querySelector('.input-tag1').value !== null) {
-    tags[0] = EDIT_TEMPLATE.content.querySelector('.input-tag1').value;
-  }
-  if (EDIT_TEMPLATE.content.querySelector('.input-tag2').value !== null) {
-    tags[1] = EDIT_TEMPLATE.content.querySelector('.input-tag2').value;
-  }
-  if (EDIT_TEMPLATE.content.querySelector('.input-tag3').value !== null) {
-    tags[2] = EDIT_TEMPLATE.content.querySelector('.input-tag3').value;
-  }
-  if (EDIT_TEMPLATE.content.querySelector('.input-tag4').value !== undefined) {
-    tags[3] = EDIT_TEMPLATE.content.querySelector('.input-tag4').value;
-  }
-  if (EDIT_TEMPLATE.content.querySelector('.input-tag5').value !== undefined) {
-    tags[4] = EDIT_TEMPLATE.content.querySelector('.input-tag5').value;
-  }
-  if (articlesModel.validateArticle({
-    title,
-    author: user,
-    createdAt: new Date(),
-    summary,
-    content,
-    tags,
-  }) === true) {
-        addArticle({ title, author: user, createdAt: new Date(), summary, content, tags });
-  }
+function handleArticleViewButtonClick(event) {
+    articleView.loadArticle(event.target.parentNode.parentNode.dataset.id);
 }
 
-const mainPageButton = document.querySelectorAll('.main-page-button');
-function handleMainPageButtonClick() {
-  renderArticles();
+function handleArticleEditButtonClick(event) {
+    editForm.loadEditForm(event.target.parentNode.parentNode.dataset.id);
 }
 
-[].forEach.call(mainPageButton, (btn) => {
-  btn.addEventListener('click', handleMainPageButtonClick);
-});
-
-const deleteButton = document.querySelectorAll('.delete-button');
-function handleDeleteButtonClick(event) {
-  const articleId = event.target.parentElement.parentElement.dataset.id;
-  console.log(articleId);
-  let confirmDelete = confirm(`${'Удалить статью:' + ' '}${articlesModel.getArticle(articleId).title} ?`);
-  if (confirmDelete === true) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('DELETE', '/article');
-    xhr.setRequestHeader('content-type', 'application/json');
-    xhr.send(JSON.stringify({
-      articleId,
-    }));
-    articlesModel.loadNews();
-    renderArticles();
-  }
+function handleArticleDeleteButtonClick(event) {
+    httpRequests.httpDeleteArticle(event.target.parentNode.parentNode.dataset.id)
+        .then(appendArticles(ARTICLES_INDEX_FROM, ARTICLES_INDEX_TO))
+        .catch(error => {
+            errorForm.loadError('Ошибка загрузки с сервера.');
+        });
 }
-[].forEach.call(deleteButton, (btn) => {
-  btn.addEventListener('click', handleDeleteButtonClick);
-});
+
+document.addEventListener('FeedLoader', appendArticles(ARTICLES_INDEX_FROM, ARTICLES_INDEX_TO));
+
+document.querySelector('.login-logout-button').addEventListener('click', handleLoginLogoutClick);

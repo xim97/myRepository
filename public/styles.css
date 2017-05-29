@@ -21,32 +21,36 @@ html {
 body {
     min-width: 1000px;
     width: 100%;
+    height: 100%;
     margin: auto;
-    font: 16px/18px Times, serif;
+    font: 16px/18px Georgia, sans-serif;
     text-align: justify;
-    background: #16b4bc;
+}
+
+a {
+    color: #000000;
 }
 
 h1 {
     color: #000000;
-    font: 25px/30px Times, serif;
+    font: 25px/30px Georgia, sans-serif;
 }
 
 h2 {
     margin: 4px;
-    font: 18px/20px Times, serif;
+    font: 18px/20px Georgia, sans-serif;
 }
 
 h3 {
-    font: 16px/18px Times, serif;
+    font: 16px/20px Georgia, sans-serif;
 }
 
-input {
-    color: #000000;
+h4 {
+    font: 20px/20px Georgia, sans-serif;
 }
 
-article {
-    margin-left: -1%;
+textarea {
+    resize: none;
 }
 
 /* Header */
@@ -56,13 +60,11 @@ header {
     background-color: #9916bc;
 }
 
-p {
-    margin: 5px;
-}
-
 /* Type of page */
-.title {
-    font: 30px/30px fantasy;
+.feed {
+    margin-left: 1%;
+    font: 35px/40px Georgia, sans-serif;
+    text-align: center;
 }
 
 /* Actions */
@@ -73,36 +75,35 @@ p {
     text-align: right;
 }
 
-.add-article-button {
-    margin-top: 0.5%;
-    margin-right: 4%;
-    float: right;
-    padding-right: 5px;
-    padding-left: 5px;
-    border-radius: 8px;
-    font: 20px/25px Times, serif;
+.header-actions a:hover {
+    box-shadow: 0 0 10px #0807b1;
+}
+
+.add-article {
+    margin-right: 3%;
+    padding: 5px;
+    border-radius: 10px;
+    font: 20px/40px Georgia, sans-serif;
     text-align: center;
-    background-color: #0807b1;
+    background-color:#0807b1;
     color: #ffffff;
 }
 
-.user-name {
+.user {
     margin-right: 3%;
-    font: 20px/30px Times, serif;
+    font: 20px/40px Georgia, sans-serif;
+    border-radius: 5px;
     text-align: center;
-    padding-right: 5px;
-    padding-left: 5px;
-    border-radius: 10px;
     background-color: #0807b1;
     color: #ffffff;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .login-logout-button {
-    margin-right: 3%;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 5px;
     border-radius: 10px;
-    font: 20px/30px Times, serif;
+    font: 20px/40px Georgia, sans-serif;
     text-align: center;
     background-color: #0807b1;
     color: #ffffff;
@@ -112,95 +113,95 @@ p {
 .article-list {
     float: left;
     width: 75%;
-    margin-top: 2%;
-    margin-left: 2%;
-
+    margin: 2%;
 }
 
-.text {
-    margin-left: -1px;
-    padding: 2px;
-    background-color: #e0dbd2;
+.article-list p {
+    padding: 0.3%;
     border-radius: 5px;
     box-shadow: 0 0 5px #000000;
 }
 
+
+
 .article-header {
     padding: 0.5%;
-    color: #000000;
     border-radius: 5px;
     box-shadow: 0 0 2px #000000;
 }
 
 .author {
+    float: left;
     width: 50%;
-    font: 16px/16px Times, serif;
+    font: 16px/16px Georgia, sans-serif;
+    text-align: left;
 }
 
 .date {
     width: 50%;
-    font: 16px/16px Times, serif;
+    font: 16px/16px Georgia, sans-serif;
 }
 
 .tag {
-    width: 100%;
     margin-right: 10px;
+    width: 100%;
     border-radius: 2px;
-    font: 15px/20px Times, serif;
-    box-shadow: 0 0 5px #000000;
-    padding: 1px;
-    background: #e0dbd2;
+    font: 15px/25px Georgia, sans-serif;
+    box-shadow: 0 0 1px #000000;
+}
+
+.tag-holder {
+    display: inline-block;
 }
 
 .article-actions {
-    text-align: right;
+    text-align: center;
 }
 
 .view-button {
-    margin-right: 1%;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 5px;
     border-radius: 10px;
-    font: 18px/260% Times, serif;
+    font: 18px/260% Georgia, sans-serif;
     text-align: center;
+    color: #000000;
     background-color: #0807b1;
     color: #ffffff;
 }
 
 .edit-button {
-    margin-right: 1%;
-    padding-left: 5px;
-    padding-right: 5px;
+    margin-right: 20%;
+    padding: 5px;
     border-radius: 10px;
-    font: 18px/260% Times, serif;
+    font: 18px/260% Georgia, sans-serif;
     text-align: center;
+    color: #000000;
     background-color: #0807b1;
     color: #ffffff;
 }
 
 .delete-button {
-    margin-right: 1%;
-    padding-left: 5px;
-    padding-right: 5px;
+    margin-left: 20%;
+    padding: 5px;
     border-radius: 10px;
-    font: 18px/260% Times, serif;
+    font: 18px/260% Georgia, sans-serif;
     text-align: center;
+    color: #000000;
     background-color: #0807b1;
     color: #ffffff;
 }
 
-/*Filters*/
+/* Filters */
 .filters {
     float: right;
-    width: 20%;
-    height: 370px;
+    width: 21%;
+    height: 500px;
     margin-top: 1%;
-    margin-right: 10px;
+    margin-bottom: 40%;
     color: #000000;
     border-radius: 10px;
     background-color: #9916bc;
     text-align: center;
-    box-shadow: 0 0 5px #000000
+    box-shadow: 0 0 5px #000000;
 }
 
 .filters h1 {
@@ -208,146 +209,235 @@ p {
 }
 
 .author-filter input,
-.tags-filter input {
-    margin: 8px;
-    width: 48%;
-    color: #000000;
+.date-filter input {
+    margin-bottom: 10px;
+    width: 70%;
+    max-height: 50px;
 }
 
-.date-filter input {
-    width: 75%;
+.tags-filter input {
+    width: 61%;
+}
+
+.confirm-filter-holder {
+    margin-top: 10px;
+    text-align: center;
 }
 
 .confirm-filter {
-    margin-left: 20%;
-    margin-right: 20%;
-    width: 30%;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 5px;
     border-radius: 10px;
-    font: 18px/23px Times, serif;
+    font: 18px/23px Georgia, sans-serif;
     text-align: center;
     background-color: #0807b1;
     color: #ffffff;
 }
 
-.reset-button {
-    margin-left: 20%;
-    margin-right: 20%;
-    width: 30%;
-    padding-left: 5px;
-    padding-right: 5px;
+.reset-filter-holder {
+    margin-top: 30px;
+}
+
+.reset-filter {
+    padding: 5px;
     border-radius: 10px;
-    font: 18px/23px Times, serif;
+    font: 18px/23px Georgia, sans-serif;
     text-align: center;
     background-color: #0807b1;
     color: #ffffff;
 }
 
-.date-filter-input {
-    clear: both;
-    text-align: right;
-    line-height: 40px;
+.add-tag-filter {
+    padding: 2px 5px;
+    border-radius: 10px;
+    font: 23px/23px Georgia, sans-serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
 }
 
-.date-filter-input label {
-    float: left;
-    padding-right: 10px;
+.chosen-tags-list {
+    margin-left: 10%;
+    width: 80%;
+    min-height: 15px;
+    text-align: center;
 }
 
-.date-input {
-    margin-left: 31px;
-    float: left;
-}
-
-/* Paginator */
+/* Navigation elements */
 .paginator {
-    width: 300px;
-    padding: 10px;
-    margin: auto;
+    margin-left: 2%;
+    margin-bottom: 2%;
+    float: left;
+    width: 75%;
+    text-align: center;
 }
 
-.paginator a {
-    padding-left: 5px;
-    padding-right: 5px;
+.pagination-next-button {
+    float: right;
+    margin-right: 40%;
+    background-color: #0807b1;
+    color: #ffffff;
+    padding: 5px;
     border-radius: 10px;
-    font: 18px/260% Times, serif;
+}
+
+.pagination-prev-button {
+    float: left;
+    margin-left: 40%;
+    background-color: #0807b1;
+    color: #ffffff;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.return-button-block {
+    margin: 2%;
+}
+
+.return-button-block a:hover {
+    box-shadow: 0 0 10px 1px #9916bc;
+}
+
+.return-button {
+    padding: 5px;
+    border-radius: 10px;
+    font: 18px/18px Georgia, sans-serif;
     text-align: center;
     background-color: #0807b1;
     color: #ffffff;
+}
+
+/* Authorization */
+.authorization-input-block {
+    margin-left: 2%;
+}
+
+.authorization-input-block input {
+    width: 15%;
+    min-width: 200px;
+    margin-right: 100%;
+    margin-bottom: 1%;
+}
+
+.login-button-block {
+    margin-top: 1%;
+    margin-left: 2%;
+    margin-bottom: 70%;
+    min-height: 100%;
+}
+
+.login-button-block a:hover {
+    box-shadow: 0 0 10px 1px #9916bc;
+}
+
+.login-button {
+    padding: 5px;
+    border-radius: 10px;
+    font: 18px/18px Georgia, sans-serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+/* View */
+.article-view {
+    margin-left: 1%;
+    margin-right: 1%;
+    min-height: 90%;
+}
+
+
+.content {
+    margin-bottom: 2%;
+    padding: 0.3%;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #000000;
+}
+
+/* Edit */
+.fixed-fields-block {
+    margin-left: 2%;
+    margin-right: 2%;
+    font: 25px/25px Georgia, sans-serif;
+    text-align: center;
+}
+
+.title-edit-block {
+    margin: 2% 2% 1%;
+}
+
+.title-edit-block textarea,
+.summary-edit-block textarea,
+.content-edit-block textarea {
+    width: 100%;
+    margin-top: 5px;
+}
+
+.existent-tags,
+.add-tag,
+.summary-edit-block,
+.content-edit-block {
+    margin: 1% 2% 1%;
+}
+
+.existent-tags-list {
+    min-height: 15px;
+}
+
+
+.add-tag-button {
+    margin-left: 1%;
+    margin-bottom: 10%;
+    padding: 5px;
+    border-radius: 10px;
+    font: 14px/14px Georgia, sans-serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+.add-article-button-block {
+    margin: 1% 2% 5%;
+}
+
+
+.add-article-button {
+    padding: 5px;
+    border-radius: 10px;
+    font: 18px/18px Georgia, sans-serif;
+    text-align: center;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+.chosen-tag {
+    margin-right: 10px;
+    width: 100%;
+    border-radius: 2px;
+    font: 15px/25px Georgia, sans-serif;
+    box-shadow: 0 0 1px #000000;
+    background-color: #0807b1;
+    color: #ffffff;
+}
+
+/* Error */
+.error-block {
+    margin-left: 2%;
+    margin-bottom: 80%;
+    min-height: 90%;
+}
+
+.error-block span {
+    font: 25px/25px Georgia, sans-serif;
+    color: black;
 }
 
 /* Footer */
 footer {
+    height: 20px;
     clear: both;
     width: 100%;
     text-align: center;
     color: #000000;
     background-color: #9916bc;
-    font: 15px/20px fantasy;
-}
-
-/* Styles for login page*/
-.login-page-field {
-    clear: both;
-    text-align: right;
-    line-height: 45px;
-}
-
-.login-page-field input {
-    color: #000000;
-}
-
-.login-page-label {
-    font: 18px/260% Times, serif;
-    float: left;
-    padding-right: 10px;
-}
-
-.login-page-fields {
-    float: left;
-    margin-left: 30%;
-}
-
-.login-button {
-    padding: 10px 30px 10px 30px;
-    border-radius: 10px;
-    font: 18px/260% Times, serif;
-    text-align: center;
-    background-color: #0807b1;
-    color: #ffffff;
-}
-
-/* Error page*/
-.error-page h1 {
-    margin-left: 35%;
-}
-
-.error-image {
-    margin-left: 30%;
-}
-
-.main-page-button {
-    padding-left: 10px;
-    padding-right: 10px;
-    border-radius: 10px;
-    font: 18px/260% Times, serif;
-    text-align: center;
-    background-color: #0807b1;
-    color: #ffffff;
-    margin-left: 35%;
-}
-
-.input-title {
-    width: 600px;
-}
-
-.accept-button {
-    padding-left: 10px;
-    padding-right: 10px;
-    border-radius: 10px;
-    font: 18px/260% Times, serif;
-    text-align: center;
-    background-color: #0807b1;
-    color: #ffffff;
+    font: 15px/20px Georgia, sans-serif;
 }

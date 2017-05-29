@@ -2,81 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Главная страница</title>
+    <title>Новостной портал</title>
     <link href="styles.css" rel="stylesheet"/>
     <script src="articles.js" async></script>
 </head>
 <body>
 <header>
-    <span class="title">Лента новостей</span>
+    <span class="feed">Лента новостей</span>
     <div class="header-actions">
-        <span class="user-name">Гость</span>
+        <span class="user">Гость</span>
         <a class="login-logout-button" href="#">Войти</a>
-
     </div>
 </header>
-<div>
-    <span class="add-article-holder"></span>
-</div>
-<div>
-    <span class="main-page-button-holder"></span>
-</div>
-<div>
-    <span class="login-holder"></span>
-</div>
-<div>
-    <span class="article-edit-holder"></span>
-</div>
-<div>
-    <span class="article-add-holder"></span>
-</div>
-<div class="article-list">Новости</div>
-<div class="filters">
-    <h1>Фильтры</h1>
-    <div class="author-filter">
-        <h2>По автору:</h2>
-        <input type="text" name="author-input" placeholder="Автор" tabindex="1">
-        <a class="confirm-filter" href="#">Применить</a>
-    </div>
-    <div class="date-filter">
-        <h2>По дате добавления:</h2>
-        <div class="date-input">
-            <div class="date-filter-input">
-                <label>С:</label>
-                <input type="date" name="date-from" tabindex="2">
+<span class="add-article-holder"></span>
+<div class="dynamic-block"></div>
+<template id="template-article-list">
+    <div class="article-list"></div>
+</template>
+<template id="template-filters">
+    <div class="filters">
+        <form name="filters">
+            <h1>Фильтры</h1>
+            <div class="author-filter">
+                <h2>По автору:</h2>
+                <input type="text" class="author-input" name="authorInput" placeholder="Автор" list="authors">
+                <datalist id="authors"></datalist>
             </div>
-            <div class="date-filter-input">
-                <label>По:</label>
-                <input type="date" name="date-to" tabindex="3">
+            <div class="date-filter">
+                <h2>По дате добавления:</h2>
+                <h3>С:</h3>
+                <input type="date" class="date-from" name="dateFrom">
+                <h3>По:</h3>
+                <input type="date" class="date-to" name="dateTo">
             </div>
-        </div>
-        <a class="confirm-filter" href="#">Применить</a>
+            <div class="tags-filter">
+                <h2>По тегам:</h2>
+                <input type="text" class="tags-input" name="tagsInput" placeholder="Тег" list="tags">
+                <datalist id="tags"></datalist>
+                <a class="add-tag-filter" href="#">+</a>
+            </div>
+            <div class="chosen-tags">
+                <h2>Выбранные теги:</h2>
+                <div class="chosen-tags-list"></div>
+            </div>
+            <div class="confirm-filter-holder">
+                <a class="confirm-filter" href="#">Применить</a>
+            </div>
+            <div class="reset-filter-holder">
+                <a class="reset-filter" href="#">Сбросить</a>
+            </div>
+        </form>
     </div>
-    <div class="tags-filter">
-        <h2>По тегам:</h2>
-        <input type="text" name="tags-input" placeholder="Теги через запятую" tabindex="4">
-        <a class="confirm-filter" href="#">Применить</a>
-    </div>
-    <a class="reset-button" href="#">Сбросить фильтры</a>
-</div>
-
+</template>
 <template id="template-article">
     <div class="article" data-id="id">
         <div class="article-header">
             <h1 class="title">Заголовок</h1>
-            <div class="date">Дата</div>
             <div class="author">Автор</div>
-            <p class="text">Текст</p>
+            <div class="date">Дата</div>
             <div class="tag-list">Список тегов</div>
         </div>
+        <p class="summary">Текст</p>
+        <div class="content-block"></div>
         <div class="article-actions"></div>
     </div>
 </template>
+<template id="template-content">
+    <p class="content">Текст</p>
+</template>
 <template id="template-tag">
-    <span class="tag">Тег</span>
+    <div class="tag-holder">
+        <span class="tag">Тег</span>
+    </div>
 </template>
 <template id="template-add-article">
-    <a class="add-article-button" href="#">Добавить новость</a>
+    <a class="add-article" href="#">Добавить новость</a>
 </template>
 <template id="template-view-button">
     <a class="view-button" href="#">Показать новость</a>
@@ -87,89 +87,90 @@
 <template id="template-delete-button">
     <a class="delete-button" href="#">Удалить</a>
 </template>
-<template id="template-edit-article">
-    <div class="article" data-id="id">
-        <div class="article-header">
-            <h2>Название</h2>
-            <input class="input-title" type="text" name="title">
-            <div class="date"></div>
-            <div class="author"></div>
-            <h2>Краткое содержание</h2>
-            <textarea rows="10" cols="100" class="input-summary"></textarea>
-            <br>
-            <h2>Текст новости</h2>
-            <textarea rows="10" cols="100" class="input-content"></textarea>
-            <br>
-            <h2>Теги</h2>
-            <input type="text" class="input-tag1">
-            <br>
-            <input type="text" class="input-tag2">
-            <br>
-            <input type="text" class="input-tag3">
-            <br>
-            <input type="text" class="input-tag4">
-            <br>
-            <input type="text" class="input-tag5">
-        </div>
-        <a class="accept-button" href="#">Принять</a>
-    </div>
-</template>
-<template id="template-create-article">
-    <div class="article" data-id="id">
-        <div class="article-header">
-            <h2>Название</h2>
-            <input class="input-title" type="text" name="title">
-            <div class="date"></div>
-            <div class="author"></div>
-            <h2>Краткое содержание</h2>
-            <textarea rows="10" cols="100" class="input-summary"></textarea>
-            <br>
-            <h2>Текст новости</h2>
-            <textarea rows="10" cols="100" class="input-content"></textarea>
-            <br>
-            <h3>Теги</h3>
-            <input type="text" class="input-tag1">
-            <br>
-            <input type="text" class="input-tag2">
-            <br>
-            <input type="text" class="input-tag3">
-            <br>
-            <input type="text" class="input-tag4">
-            <br>
-            <input type="text" class="input-tag5">
-        </div>
-        <a class="accept-button" href="#">Принять</a>
-    </div>
-</template>
-<template id="template-login">
-    <div class="login-page-fields">
-        <div class="login-page-field">
-            <label class="login-page-label">Логин: </label>
-            <input type="text" name="login-input" tabindex="1">
-        </div>
-        <div class="login-page-field">
-            <label class="login-page-label">Пароль: </label>
-            <input type="text" name="password-input" tabindex="2">
-        </div>
-        <a class="login-button" href="#">Авторизация</a>
-    </div>
-</template>
 <template id="template-paginator">
-    <div class="paginator">
-        <a href="#">Показать ещё</a>
+    <div class="paginator"></div>
+</template>
+<template id="template-pagination-next-button">
+    <a class="pagination-next-button" href="#">Далее&raquo;</a>
+</template>
+<template id="template-pagination-prev-button">
+    <a class="pagination-prev-button" href="#">&laquo;Назад</a>
+</template>
+<template id="template-return-button">
+    <div class="return-button-block">
+        <a class="return-button" href="#">Вернуться к ленте</a>
     </div>
 </template>
-<template id="template-main-page-button">
-    <div class="main-page">
-        <a class="main-page-button" href="index.html">На главную</a>
+<template id="template-authorization-input-block">
+    <form class="authorization-input-block" name="authorization-input">
+        <input type="text" name="login-input" placeholder="Логин" required>
+        <input type="password" name="password-input" placeholder="Пароль" required>
+    </form>
+</template>
+<template id="template-login-button">
+    <div class="login-button-block">
+        <a class="login-button" href="#">Войти</a>
     </div>
 </template>
-<div>
-    <span class="main-page-button-holder"></span>
-</div>
-<div>
-    <span class="paginator-holder"></span>
-</div>
-<footer>&copy;Новостной портал. Ефимович Максим Геннадьевич, 2 курс 6 группа, fpm.efimovic@bsu.by 14.03.2017</footer>
+<template id="template-edit-form">
+    <div class="edit-form">
+        <div class="fixed-fields-block">
+            <div class="id-edit-block">
+                <span>ID: </span>
+                <span class="id-edit">ID</span>
+            </div>
+            <div class="author-edit-block">
+                <span>Автор: </span>
+                <span class="author-edit">Автор</span>
+            </div>
+            <div class="date-edit-block">
+                <span>Дата и время создания: </span>
+                <span class="date-edit">Дата и время</span>
+            </div>
+        </div>
+        <div class="title-edit-block">
+            <h4>Заглавие новости:</h4>
+            <textarea maxlength="100" rows="1" id="title-input" required></textarea>
+        </div>
+        <div class="existent-tags">
+            <h4>Существующие теги:</h4>
+            <div class="existent-tags-list"></div>
+        </div>
+        <div class="add-tag">
+            <textarea maxlength="20" rows="1" cols="20" id="tag-input"></textarea>
+            <a class="add-tag-button" href="#">Добавить тег</a>
+        </div>
+        <div class="summary-edit-block">
+            <h4>Краткое описание:</h4>
+            <textarea maxlength="200" rows="2" id="summary-input" required></textarea>
+        </div>
+        <div class="content-edit-block">
+            <h4>Текст новости:</h4>
+            <textarea rows="20" id="content-input"></textarea>
+        </div>
+        <div class="add-article-button-block">
+            <a class="add-article-button" href="#">Добавить новость в ленту</a>
+        </div>
+    </div>
+</template>
+<template id="template-existent-tag">
+    <div class="tag-holder">
+        <a class="tag" href="#">Тег</a>
+    </div>
+</template>
+<template id="template-chosen-tag">
+    <div class="tag-holder">
+        <a class="chosen-tag" href="#">Тег</a>
+    </div>
+</template>
+<template id="template-option">
+    <option class="option" value=""></option>
+</template>
+<template id="template-error">
+    <div class="error-block">
+        <span class="error">Ошибка</span>
+    </div>
+</template>
+<footer>Новостной портал. Ефимович Максим 2 курс 6 группа. fpm.efimovic@bsu.by. 14.03.2017</footer>
 </body>
 </html>
